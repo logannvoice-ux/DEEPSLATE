@@ -51,6 +51,9 @@ body.nocursor{cursor:none}
 .btn{font-family:'Silkscreen';font-size:13px;letter-spacing:2px;padding:13px 36px;background:none;border:1px solid var(--txt);color:var(--txt);cursor:pointer;transition:background .12s,color .12s}
 .btn:hover:not(:disabled){background:var(--txt);color:#0a0c10}
 .btn:disabled{opacity:.35;cursor:default}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover:not(:disabled){background:var(--red);color:#0a0c10}
+.btn.sm{font-size:11px;padding:9px 26px}
 kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 6px;background:rgba(255,255,255,.05);color:#cfd3da}
 
 /* ---------- boot ---------- */
@@ -73,6 +76,7 @@ kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px
 .pp-title{font-family:'Silkscreen';font-size:24px;letter-spacing:6px}
 .pp-sub{font-size:11px;color:var(--dim);letter-spacing:1px}
 .pp-sub b{color:var(--txt)}
+.pp-btns{display:flex;flex-direction:column;gap:10px;align-items:center}
 
 /* ---------- cheat client (tabbed) ---------- */
 #cheatMenu{background:rgba(4,5,8,.45);backdrop-filter:blur(3px);z-index:55}
@@ -129,7 +133,7 @@ input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
   <div class="cm-panel">
     <div class="cm-head">
       <svg class="cm-logo" viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="#ff3b43" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#ff3b43"/></svg>
-      <div><div class="cm-title">ECHO</div><div class="cm-sub">VOXEL UTILITY CLIENT · v1.4.1</div></div>
+      <div><div class="cm-title">ECHO</div><div class="cm-sub">VOXEL UTILITY CLIENT · v1.4.2</div></div>
       <div class="cm-status"><i></i>ATTACHED</div>
     </div>
     <div class="cm-tabs">
@@ -197,7 +201,10 @@ input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
   <div class="pp-panel">
     <div class="pp-title">PAUSED</div>
     <div class="pp-sub">world seed <b id="pauseSeed"></b></div>
-    <button class="btn" id="btnResume">RESUME</button>
+    <div class="pp-btns">
+      <button class="btn" id="btnResume">RESUME</button>
+      <button class="btn danger sm" id="btnDisconnect">DISCONNECT</button>
+    </div>
     <div class="keys">
       <div><span>Move / Jump</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div>
       <div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div>
@@ -260,7 +267,9 @@ import * as THREE from 'three';
    resists) · hand+legs view-model (pickaxe / trident / firework) ·
    particles · ESP (real + ghost markers, ~50% accurate) · ECHO client
    UI (tabbed: RENDER / ECHO ESP / ECHO / WORLD) · HUD (no site
-   spoilers) · audio synth · robust pointer-lock manager · main loop
+   spoilers) · audio synth · robust pointer-lock manager · disconnect/
+   reconnect (world persists in memory between sessions at the menu) ·
+   main loop
    ===================================================================== */
 
 /* ---------------- config ---------------- */
@@ -282,7 +291,7 @@ const RIPTIDE_CD=0.35;    // cooldown between boosts (s)
 /* ---- timed weather ----
    Clear and rain alternate on a fixed clock: RAIN_PERIOD seconds clear,
    then RAIN_PERIOD seconds rain, forever. The cycle starts CLEAR the
-   moment you enter the world and freezes while the game is paused.  */
+   moment you enter the world and freezes while paused/disconnected.  */
 const RAIN_PERIOD=150;    // 2.5 minutes per phase → 5 minute full cycle
 
 /* ---- rain ---- */
@@ -309,8 +318,8 @@ function setSens(m){
    cell with a safety margin. Two sites therefore can NEVER overlap and
    always keep at least MIN_GAP blocks of solid rock between them.
    Defaults → roughly ONE site per 800×800 block area.
-   v1.4.1: sites are carved ENTIRELY inside the deepslate band —
-   ceilings y-1..-15, floors down to -58 (bedrock is at -60).
+   Sites are carved ENTIRELY inside the deepslate band — ceilings
+   y-1..-15, floors down to -58 (bedrock is at -60).
    Ghosts: each cell can ALSO host a fake marker (same chance, different
    salt) that the chunkfinder draws identically — but nothing is carved
    there. Real:ghost ≈ 50:50, so the ESP is only ~50% accurate.
@@ -342,8 +351,8 @@ function heightAt(wx,wz){
 }
 
 /* ---------------- block registry ----------------
-   pick = break time WITH the pickaxe (v1.4.1: near-instant on everything
-   except deepslate, which puts up a brief fight); hand = bare hands.   */
+   pick = break time WITH the pickaxe (near-instant on everything except
+   deepslate, which puts up a brief fight); hand = bare hands.          */
 const AIR=0,GRASS=1,DIRT=2,STONE=3,DEEPSLATE=4,LOG=5,LEAVES=6,BEDROCK=7;
 const BLOCK_DEF={
   [GRASS]:    {name:'Grass Block',tiles:[1,1,2,0,1,1],hand:0.9, pick:0.05,color:0x6da84e},
@@ -815,6 +824,7 @@ addEventListener('wheel',e=>{
     syncMenuUI();return;
   }
   if(paused||cheatOpen||!(locked()||softLock))return;
+  hotbarSel=(hotbarSel+(hotbarSel+(e.deltaY>0?1:-1))>=0?0:0);   // (kept simple below)
   hotbarSel=(hotbarSel+(e.deltaY>0?1:-1)+hotbarSlots.length)%hotbarSlots.length;
   updateHotbar();sfx.ui();
 },{passive:true});
@@ -1231,7 +1241,7 @@ function updateClouds(dt){
 /* ---------------- timed weather cycle + rain ----------------
    weather.on is driven purely by the clock: RAIN_PERIOD seconds clear,
    RAIN_PERIOD seconds rain, repeating. The cycle starts CLEAR when you
-   enter the world and freezes while paused.                              */
+   enter the world and freezes while paused/disconnected.              */
 const weather={on:false};
 let weatherTimer=0;
 function updateWeatherCycle(dt){
@@ -1604,7 +1614,60 @@ function updateCamera(dt){
   handCam.updateProjectionMatrix();
 }
 
-/* ---------------- boot ---------------- */
+/* ---------------- boot / enter / disconnect ----------------
+   enterWorld() serves both the first join and every reconnect after a
+   disconnect. The world (chunk edits, inventory, position) lives in
+   memory the whole time — disconnect just parks you at the menu.    */
+let hasJoined=false;
+function enterWorld(){
+  const rejoined=hasJoined;
+  hasJoined=true;
+  AU.init();if(AU.ctx.state==='suspended')AU.ctx.resume();
+  started=true;
+  $('boot').classList.add('hidden');
+  for(const id of['cross','debug','hotbar','heldName'])$(id).classList.remove('hidden');
+  refreshStreaming(true);          // instant on reconnect — everything is already meshed
+  attemptLock();syncCursor();
+  // weather picks up exactly where the clock stopped
+  rainMesh.visible=weather.on;
+  if(weather.on)AU.rainSet(true);
+  if(rejoined){
+    setTimeout(()=>toast('Reconnected — picking up where you left off'),400);
+  }else{
+    setTimeout(()=>toastOnce('t1','Press [1] to draw your pickaxe'),900);
+    setTimeout(()=>toastOnce('t2','Hold LMB on a block to mine it — blocks go to your hotbar'),6500);
+    setTimeout(()=>toastOnce('t3','Double-tap SPACE anywhere — even on the ground — to deploy your elytra'),13000);
+    setTimeout(()=>toastOnce('t4','Press [2] for the trident — RMB riptides once the rain rolls in'),19000);
+    setTimeout(()=>toastOnce('t5','[ / ] adjust look sensitivity · RSHIFT opens ECHO','cheat'),25000);
+  }
+}
+function disconnect(){
+  if(!started)return;
+  // drop all volatile state — you rejoin standing still, same spot
+  for(const k in keys)keys[k]=false;
+  mouseL=mouseR=false;
+  gliding=false;glideLaunchT=0;
+  player.vel.set(0,0,0);
+  acc=0;
+  if(cheat.freecam.on){cheat.freecam.on=false;syncMenuUI();updateWatermark();}
+  if(cheat.esp.on){cheat.esp.on=false;espGroup.visible=false;syncMenuUI();updateWatermark();}
+  if(cheatOpen){cheatOpen=false;$('cheatMenu').classList.add('hidden');}
+  if(paused){paused=false;$('pause').classList.add('hidden');}
+  hlBox.visible=false;crackBox.visible=false;
+  mineKey=null;mineProg=0;
+  started=false;
+  AU.rainSet(false);               // silence the storm at the menu
+  // boot screen in resume mode — world preserved, instant rejoin
+  for(const id of['cross','debug','hotbar','heldName','glideHud','wm'])$(id).classList.add('hidden');
+  $('bootFill').style.width='100%';
+  $('bootNote').textContent=`world preserved — rejoin at ${player.pos.x.toFixed(0)} / ${player.pos.y.toFixed(0)} / ${player.pos.z.toFixed(0)}`;
+  $('btnEnter').disabled=false;
+  $('btnEnter').textContent='RECONNECT';
+  $('boot').classList.remove('hidden');
+  syncCursor();
+}
+ $('btnDisconnect').addEventListener('click',e=>{e.target.blur();disconnect();});
+
 buildHotbar();updateHotbar();syncMenuUI();applyRainDensity();
  $('bootSeed').textContent=SEED;$('pauseSeed').textContent=SEED;
 refreshStreaming(true);bootTotal=queue.length;
@@ -1617,23 +1680,7 @@ const bootStep=()=>{
   else $('btnEnter').disabled=false;
 };
 requestAnimationFrame(bootStep);
- $('btnEnter').addEventListener('click',e=>{
-  e.target.blur();
-  AU.init();if(AU.ctx.state==='suspended')AU.ctx.resume();
-  started=true;
-  $('boot').classList.add('hidden');
-  for(const id of['cross','debug','hotbar','heldName'])$(id).classList.remove('hidden');
-  attemptLock();syncCursor();
-  // weather cycle starts CLEAR — first rain arrives after RAIN_PERIOD seconds
-  rainMesh.visible=weather.on;             // false
-  for(const d of rainDrops)respawnDrop(d);
-  weatherTimer=0;
-  setTimeout(()=>toast('Press [1] to draw your pickaxe'),900);
-  setTimeout(()=>toastOnce('t2','Hold LMB on a block to mine it — blocks go to your hotbar'),6500);
-  setTimeout(()=>toastOnce('t3','Double-tap SPACE anywhere — even on the ground — to deploy your elytra'),13000);
-  setTimeout(()=>toastOnce('t4','Press [2] for the trident — RMB riptides once the rain rolls in'),19000);
-  setTimeout(()=>toastOnce('t5','[ / ] adjust look sensitivity · RSHIFT opens ECHO','cheat'),25000);
-});
+ $('btnEnter').addEventListener('click',e=>{e.target.blur();enterWorld();});
 
 /* ---------------- main loop ---------------- */
 let lastT=performance.now(),acc=0;
