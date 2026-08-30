@@ -18,15 +18,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
 .hidden{display:none!important}
 .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50}
 body.nocursor{cursor:none}
-
-/* ---------- HUD ---------- */
 #vig{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at center,transparent 63%,rgba(0,0,0,.26) 100%)}
+#waterFx{position:fixed;inset:0;z-index:15;pointer-events:none;background:radial-gradient(ellipse at center,rgba(22,70,148,.26) 0%,rgba(8,38,86,.46) 100%)}
 #cross{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);z-index:20;pointer-events:none;mix-blend-mode:difference}
 #cross::before,#cross::after{content:'';position:absolute;background:#fff}
 #cross::before{left:8px;top:0;width:2px;height:18px}
 #cross::after{top:8px;left:0;width:18px;height:2px}
-#debug{position:fixed;left:14px;top:12px;font-size:11px;line-height:1.7;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:20;pointer-events:none;white-space:pre;letter-spacing:.4px}
-#debug em{color:#9fe07c;font-style:normal}
+#coords{position:fixed;left:14px;top:10px;font-family:'Silkscreen';font-size:19px;line-height:1.2;letter-spacing:1px;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.8);z-index:20;pointer-events:none;white-space:pre}
+#debug{position:fixed;left:14px;top:46px;font-size:11px;line-height:1.7;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:20;pointer-events:none;white-space:pre;letter-spacing:.4px}
 #wm{position:fixed;right:14px;top:12px;font-family:'Silkscreen';font-size:10px;letter-spacing:1px;color:var(--red);border:1px solid rgba(255,59,67,.5);background:rgba(22,8,10,.6);padding:5px 9px;border-radius:3px;z-index:20}
 #glideHud{position:fixed;right:14px;bottom:18px;text-align:right;font-family:'Silkscreen';color:#fff;text-shadow:0 1px 3px #000;z-index:20}
 #glideHud .spd{font-size:20px}
@@ -44,10 +43,7 @@ body.nocursor{cursor:none}
 .toast.good{border-left-color:var(--ok)}
 .toast.out{opacity:0;transform:translateX(-8px);transition:.3s}
 @keyframes tIn{from{opacity:0;transform:translateX(-8px)}}
-/* HUD must never eat clicks (matters in fallback mouse mode) */
-#debug,#cross,#wm,#glideHud,#heldName,#hotbar,#toasts{pointer-events:none}
-
-/* ---------- shared panel bits ---------- */
+#coords,#debug,#cross,#wm,#glideHud,#heldName,#hotbar,#toasts{pointer-events:none}
 .btn{font-family:'Silkscreen';font-size:13px;letter-spacing:2px;padding:13px 36px;background:none;border:1px solid var(--txt);color:var(--txt);cursor:pointer;transition:background .12s,color .12s}
 .btn:hover:not(:disabled){background:var(--txt);color:#0a0c10}
 .btn:disabled{opacity:.35;cursor:default}
@@ -55,8 +51,6 @@ body.nocursor{cursor:none}
 .btn.danger:hover:not(:disabled){background:var(--red);color:#0a0c10}
 .btn.sm{font-size:11px;padding:9px 26px}
 kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 6px;background:rgba(255,255,255,.05);color:#cfd3da}
-
-/* ---------- boot ---------- */
 #boot{background:#0a0c10;z-index:100;flex-direction:column;gap:22px}
 .boot-inner{display:flex;flex-direction:column;align-items:center;gap:20px;max-width:560px;text-align:center}
 .boot-logo{font-family:'Silkscreen';font-weight:700;font-size:52px;letter-spacing:10px;color:var(--txt)}
@@ -69,16 +63,12 @@ kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px
 .keys div{display:flex;justify-content:space-between;gap:16px;min-width:210px}
 .boot-foot{font-size:10px;letter-spacing:1px;color:#565a63;margin-top:4px}
 .boot-foot b{color:var(--dim)}
-
-/* ---------- pause ---------- */
 #pause{background:rgba(6,8,11,.72);backdrop-filter:blur(4px);z-index:60}
 .pp-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:34px 40px;display:flex;flex-direction:column;align-items:center;gap:18px}
 .pp-title{font-family:'Silkscreen';font-size:24px;letter-spacing:6px}
 .pp-sub{font-size:11px;color:var(--dim);letter-spacing:1px}
 .pp-sub b{color:var(--txt)}
 .pp-btns{display:flex;flex-direction:column;gap:10px;align-items:center}
-
-/* ---------- cheat client (tabbed) ---------- */
 #cheatMenu{background:rgba(4,5,8,.45);backdrop-filter:blur(3px);z-index:55}
 .cm-panel{width:440px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.65)}
 .cm-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
@@ -102,6 +92,7 @@ kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px
 .cm-desc{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.45}
 .cm-slider{display:flex;align-items:center;gap:12px;padding:2px 16px 10px;font-size:10px;letter-spacing:2px;color:var(--dim)}
 .cm-slider b{color:var(--txt);min-width:34px;text-align:right;font-size:11px}
+.cm-acstat{margin-left:auto;font-family:'Silkscreen';font-size:9px;letter-spacing:1px;color:var(--dim);flex:none}
 input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
 .sw{position:relative;width:40px;height:20px;flex:none;cursor:pointer;margin-left:auto}
 .sw input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;z-index:1}
@@ -118,22 +109,21 @@ input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
 </head>
 <body>
 <canvas id="game"></canvas>
-
 <div id="vig"></div>
+<div id="waterFx" class="hidden"></div>
 <div id="cross" class="hidden"></div>
+<div id="coords" class="hidden"></div>
 <div id="debug" class="hidden"></div>
 <div id="wm" class="hidden"></div>
 <div id="glideHud" class="hidden"><div class="spd" id="glideSpd">0.0</div><div class="lbl">M/S · GLIDING</div></div>
 <div id="heldName" class="hidden"></div>
 <div id="hotbar" class="hidden"></div>
 <div id="toasts"></div>
-
-<!-- ================= ECHO cheat client (tabbed) ================= -->
 <div id="cheatMenu" class="overlay hidden">
   <div class="cm-panel">
     <div class="cm-head">
       <svg class="cm-logo" viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="#ff3b43" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#ff3b43"/></svg>
-      <div><div class="cm-title">ECHO</div><div class="cm-sub">VOXEL UTILITY CLIENT · v1.4.2</div></div>
+      <div><div class="cm-title">ECHO</div><div class="cm-sub">VOXEL UTILITY CLIENT · v1.7.3</div></div>
       <div class="cm-status"><i></i>ATTACHED</div>
     </div>
     <div class="cm-tabs">
@@ -143,263 +133,130 @@ input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
       <button class="cm-tab" data-tab="world"><span>WORLD</span><i class="cm-dot"></i></button>
     </div>
     <div class="cm-body">
-      <!-- RENDER -->
-      <div class="cm-pane hidden" data-pane="render">
-        <div class="cm-empty">
-          <svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
-          <div class="cm-empty-t">NO MODULES</div>
-          <div class="cm-empty-s">no render modules yet — this category is standing by</div>
-        </div>
-      </div>
-      <!-- ECHO ESP -->
-      <div class="cm-pane hidden" data-pane="espesp">
-        <div class="cm-cat">ESP</div>
-        <div class="cm-mod">
-          <div><div class="cm-name">Chunkfinder</div><div class="cm-desc">Outlines possible dig sites on the grass layer. Drawn through terrain. ESP accuracy not guaranteed — some marks are ghosts.</div></div>
-          <label class="sw"><input type="checkbox" id="swEsp"><i></i></label>
-        </div>
-        <div class="cm-slider"><span>RANGE</span><input type="range" id="rgEsp" min="2" max="40" step="1" value="12"><b id="espVal">12</b></div>
-      </div>
-      <!-- ECHO -->
-      <div class="cm-pane" data-pane="echo">
-        <div class="cm-cat">MOVEMENT</div>
-        <div class="cm-mod">
-          <div><div class="cm-name">Freecam <kbd>C</kbd></div><div class="cm-desc">Detached camera with full 360° rotation — flies where you look. Space / Shift vertical, wheel adjusts speed.</div></div>
-          <label class="sw"><input type="checkbox" id="swFreecam"><i></i></label>
-        </div>
-        <div class="cm-slider"><span>SPEED</span><input type="range" id="rgFcSpeed" min="2" max="40" step="1" value="14"><b id="fcSpeedVal">14</b></div>
-        <div class="cm-cat">TRIDENT</div>
-        <div class="cm-mod">
-          <div><div class="cm-name">Echo Trident <kbd>2</kbd></div><div class="cm-desc">Riptide tuning for the trident. Boost stacks extra speed on top of the launch.</div></div>
-        </div>
-        <div class="cm-slider"><span>BOOST</span><input type="range" id="rgTriBoost" min="0" max="150" step="5" value="0"><b id="triBoostVal">+0%</b></div>
-        <div class="cm-mod">
-          <div><div class="cm-name">No Rain</div><div class="cm-desc">When off, the trident only riptides while it's raining. On — any weather.</div></div>
-          <label class="sw"><input type="checkbox" id="swNoRain"><i></i></label>
-        </div>
-        <div class="cm-cat">CLIENT</div>
-        <div class="cm-mod">
-          <div><div class="cm-name">Sensitivity <kbd>[</kbd><kbd>]</kbd></div><div class="cm-desc">Mouse look speed. Adjust in-game with [ and ] — saved automatically.</div></div>
-        </div>
-        <div class="cm-slider"><span>LOOK SPEED</span><input type="range" id="rgSens" min="20" max="300" step="5" value="100"><b id="sensVal">100%</b></div>
-      </div>
-      <!-- WORLD -->
-      <div class="cm-pane hidden" data-pane="world">
-        <div class="cm-empty">
-          <svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
-          <div class="cm-empty-t">NO MODULES</div>
-          <div class="cm-empty-s">no world modules yet — this category is standing by</div>
-        </div>
-      </div>
+      <div class="cm-pane hidden" data-pane="render"><div class="cm-empty"><svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg><div class="cm-empty-t">NO MODULES</div><div class="cm-empty-s">no render modules yet — this category is standing by</div></div></div>
+      <div class="cm-pane hidden" data-pane="espesp"><div class="cm-cat">ESP</div><div class="cm-mod"><div><div class="cm-name">Basefinder</div><div class="cm-desc">Outlines chunks that may contain buried bases. Drawn through terrain. ESP accuracy not guaranteed — some marks are ghosts.</div></div><label class="sw"><input type="checkbox" id="swEsp"><i></i></label></div><div class="cm-slider"><span>RANGE</span><input type="range" id="rgEsp" min="2" max="40" step="1" value="12"><b id="espVal">12</b></div></div>
+      <div class="cm-pane" data-pane="echo"><div class="cm-cat">MOVEMENT</div><div class="cm-mod"><div><div class="cm-name">Freecam <kbd>C</kbd></div><div class="cm-desc">Detached camera with full 360° rotation — flies where you look. Deepslate only renders below y5 in synced chunks (see Anticheat).</div></div><label class="sw"><input type="checkbox" id="swFreecam"><i></i></label></div><div class="cm-slider"><span>SPEED</span><input type="range" id="rgFcSpeed" min="2" max="40" step="1" value="14"><b id="fcSpeedVal">14</b></div><div class="cm-cat">TRIDENT</div><div class="cm-mod"><div><div class="cm-name">Echo Trident <kbd>2</kbd></div><div class="cm-desc">Riptide tuning for the trident. Boost stacks extra speed on top of the launch.</div></div></div><div class="cm-slider"><span>BOOST</span><input type="range" id="rgTriBoost" min="0" max="150" step="5" value="0"><b id="triBoostVal">+0%</b></div><div class="cm-mod"><div><div class="cm-name">No Rain</div><div class="cm-desc">When off, the trident riptides in rain or open water. On — any conditions.</div></div><label class="sw"><input type="checkbox" id="swNoRain"><i></i></label></div><div class="cm-cat">CLIENT</div><div class="cm-mod"><div><div class="cm-name">Sensitivity <kbd>[</kbd><kbd>]</kbd></div><div class="cm-desc">Mouse look speed. Adjust in-game with [ and ] — saved automatically.</div></div></div><div class="cm-slider"><span>LOOK SPEED</span><input type="range" id="rgSens" min="20" max="300" step="5" value="100"><b id="sensVal">100%</b></div><div class="cm-mod"><div><div class="cm-name">Anticheat</div><div class="cm-desc">Server-side deepslate gating — base data only streams after in-person verification and a relog. Breaching a base's floor syncs its every chunk instantly.</div></div><b class="cm-acstat" id="acStat">0 synced</b></div></div>
+      <div class="cm-pane hidden" data-pane="world"><div class="cm-empty"><svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg><div class="cm-empty-t">NO MODULES</div><div class="cm-empty-s">no world modules yet — this category is standing by</div></div></div>
     </div>
     <div class="cm-foot"><span id="cmPos">—</span><span id="cmMeta">—</span></div>
   </div>
 </div>
-
-<!-- ================= pause ================= -->
 <div id="pause" class="overlay hidden">
-  <div class="pp-panel">
-    <div class="pp-title">PAUSED</div>
-    <div class="pp-sub">world seed <b id="pauseSeed"></b></div>
-    <div class="pp-btns">
-      <button class="btn" id="btnResume">RESUME</button>
-      <button class="btn danger sm" id="btnDisconnect">DISCONNECT</button>
-    </div>
-    <div class="keys">
-      <div><span>Move / Jump</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div>
-      <div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div>
-      <div><span>Pickaxe</span><span><kbd>1</kbd></span></div>
-      <div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div>
-      <div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div>
-      <div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div>
-      <div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
-      <div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div>
-      <div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div>
-      <div><span>Freecam</span><span><kbd>C</kbd></span></div>
-      <div><span>Debug overlay</span><span><kbd>F3</kbd></span></div>
-      <div><span>Mute audio</span><span><kbd>M</kbd></span></div>
-    </div>
-  </div>
+  <div class="pp-panel"><div class="pp-title">PAUSED</div><div class="pp-sub">world seed <b id="pauseSeed"></b></div><div class="pp-btns"><button class="btn" id="btnResume">RESUME</button><button class="btn danger sm" id="btnDisconnect">DISCONNECT</button></div><div class="keys"><div><span>Move / Jump / Swim</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div><div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div><div><span>Pickaxe</span><span><kbd>1</kbd></span></div><div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div><div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div><div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div><div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div><div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div><div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div><div><span>Freecam</span><span><kbd>C</kbd></span></div><div><span>Debug overlay</span><span><kbd>F3</kbd></span></div><div><span>Mute audio</span><span><kbd>M</kbd></span></div></div></div>
 </div>
-
-<!-- ================= boot ================= -->
 <div id="boot" class="overlay">
-  <div class="boot-inner">
-    <div class="boot-logo">DEEP<b>SLATE</b></div>
-    <div class="boot-sub">VOXEL EXCAVATION SANDBOX</div>
-    <div class="boot-bar"><i id="bootFill"></i></div>
-    <div class="boot-note" id="bootNote">carving terrain…</div>
-    <button class="btn" id="btnEnter" disabled>ENTER WORLD</button>
-    <div class="keys">
-      <div><span>Move / Jump</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div>
-      <div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div>
-      <div><span>Pickaxe</span><span><kbd>1</kbd></span></div>
-      <div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div>
-      <div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div>
-      <div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div>
-      <div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
-      <div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div>
-      <div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div>
-      <div><span>Freecam</span><span><kbd>C</kbd></span></div>
-      <div><span>Debug overlay</span><span><kbd>F3</kbd></span></div>
-      <div><span>Mute audio</span><span><kbd>M</kbd></span></div>
-    </div>
-    <div class="boot-foot">seed <b id="bootSeed"></b> · desktop + mouse required · embedded <b>ECHO</b> client (RSHIFT in game)</div>
-  </div>
+  <div class="boot-inner"><div class="boot-logo">DEEP<b>SLATE</b></div><div class="boot-sub">VOXEL EXCAVATION SANDBOX</div><div class="boot-bar"><i id="bootFill"></i></div><div class="boot-note" id="bootNote">carving terrain…</div><button class="btn" id="btnEnter" disabled>ENTER WORLD</button><div class="keys"><div><span>Move / Jump / Swim</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div><div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div><div><span>Pickaxe</span><span><kbd>1</kbd></span></div><div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div><div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div><div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div><div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div><div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div><div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div><div><span>Freecam</span><span><kbd>C</kbd></span></div><div><span>Debug overlay</span><span><kbd>F3</kbd></span></div><div><span>Mute audio</span><span><kbd>M</kbd></span></div></div><div class="boot-foot">seed <b id="bootSeed"></b> · desktop + mouse required · embedded <b>ECHO</b> client (RSHIFT in game)</div></div>
 </div>
-
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
 </script>
 <script type="module">
 import * as THREE from 'three';
 
-/* =====================================================================
-   DEEPSLATE — single-file voxel sandbox
-   layer stack (deep world):
-     grass y60 · dirt y59-54 · stone y53-0 · deepslate y-1..-59 ·
-     bedrock y-60 (surface ripples ±2 with the terrain)
-   modules: rng/noise · registry · atlas · worldgen (layers/trees/sites
-   — sites live ONLY in deepslate) · chunk mesher (face culling + vertex
-   AO) · streaming · physics (walk / elytra incl. ground launch / riptide
-   trident — fast, substepped collisions) · timed weather cycle (150s
-   clear ↔ 150s rain) · raycast mining (insta-break pickaxe, deepslate
-   resists) · hand+legs view-model (pickaxe / trident / firework) ·
-   particles · ESP (real + ghost markers, ~50% accurate) · ECHO client
-   UI (tabbed: RENDER / ECHO ESP / ECHO / WORLD) · HUD (no site
-   spoilers) · audio synth · robust pointer-lock manager · disconnect/
-   reconnect (world persists in memory between sessions at the menu) ·
-   main loop
-   ===================================================================== */
-
-/* ---------------- config ---------------- */
-const CS=16, Y_MIN=-63, Y_MAX=89, CH=Y_MAX-Y_MIN+1;   // 3 void under bedrock(-60), build headroom above trees
-const RENDER_R=6, FOG_NEAR=42, FOG_FAR=86;
+const CS=16,Y_MIN=-63,Y_MAX=89,CH=Y_MAX-Y_MIN+1;
+const RENDER_R=6,FOG_NEAR=42,FOG_FAR=86;
 const SKY=0x86aee4;
-const GRAV=32, JUMP_V=9.2, WALK=4.4, SPRINT=7.3;
-const REACH=5, STEP=1/60, TERRAIN_AMP=1.6;   // set TERRAIN_AMP=0 for a perfectly flat y60 plain
-const PITCH_LIM=Math.PI/2;  // body camera: full 90° down (feet) and 90° up; freecam is fully unclamped
-const GLIDE_LAUNCH=0.45;    // seconds after a ground-launched glide where contact won't cancel it
-
-/* ---- riptide trident ----
-   Base launch equals what the old build did at BOOST +150%
-   (old base 21 × 2.5 = 52.5). The Echo Trident BOOST slider still stacks
-   on top of this (up to ×2.5 again at +150%).                       */
-const RIPTIDE_V=52.5;     // launch speed along the look vector
-const RIPTIDE_CD=0.35;    // cooldown between boosts (s)
-
-/* ---- timed weather ----
-   Clear and rain alternate on a fixed clock: RAIN_PERIOD seconds clear,
-   then RAIN_PERIOD seconds rain, forever. The cycle starts CLEAR the
-   moment you enter the world and freezes while paused/disconnected.  */
-const RAIN_PERIOD=150;    // 2.5 minutes per phase → 5 minute full cycle
-
-/* ---- rain ---- */
-const RAIN_N=520;         // max rain streaks
-const RAIN_R=24;          // rain follows the player inside this radius
-
-/* ---- look sensitivity ----
-   The multiplier is user-adjustable ([ / ] keys or the ECHO client slider,
-   under the ECHO tab) and persisted.                                    */
-const SENS_DEF=0.0044;    // radians of yaw per mouse pixel at 100%
+const SEA_LEVEL=57;
+const GRAV=32,JUMP_V=9.2,WALK=4.4,SPRINT=7.3;
+const SWIM=2.9;
+const REACH=5,STEP=1/60,TERRAIN_AMP=1.6;
+const PITCH_LIM=Math.PI/2;
+const GLIDE_LAUNCH=0.45;
+const DEEP_Y=5;
+const RIPTIDE_V=52.5;
+const RIPTIDE_CD=0.35;
+const RIP_PLOW=0.75;   // v1.7.3: seconds after a riptide that water drag/sink-clamp are
+                        // suspended — the boost plows through water in ANY direction
+const RAIN_PERIOD=150;
+const RAIN_N=520;
+const RAIN_R=24;
+const SENS_DEF=0.0088;
 let sensMult=1;
-try{const v=parseFloat(localStorage.getItem('ds_sens'));if(isFinite(v))sensMult=Math.min(3,Math.max(0.2,v));}catch(e){}
+try{const v=parseFloat(localStorage.getItem('ds_sens2'));if(isFinite(v))sensMult=Math.min(3,Math.max(0.2,v));}catch(e){}
 let SENS=SENS_DEF*sensMult;
-function setSens(m){
-  sensMult=Math.min(3,Math.max(0.2,m));
-  SENS=SENS_DEF*sensMult;
-  try{localStorage.setItem('ds_sens',String(sensMult));}catch(e){}
-}
-
-/* ---- dig-site placement (very rare, grid placement, overlap-proof) ----
-   The world is divided into SITE_CELL×SITE_CELL-chunk super-cells.
-   Each super-cell independently has a SITE_CHANCE chance of hosting ONE
-   dig site, and the site's footprint is constrained to stay inside its
-   cell with a safety margin. Two sites therefore can NEVER overlap and
-   always keep at least MIN_GAP blocks of solid rock between them.
-   Defaults → roughly ONE site per 800×800 block area.
-   Sites are carved ENTIRELY inside the deepslate band — ceilings
-   y-1..-15, floors down to -58 (bedrock is at -60).
-   Ghosts: each cell can ALSO host a fake marker (same chance, different
-   salt) that the chunkfinder draws identically — but nothing is carved
-   there. Real:ghost ≈ 50:50, so the ESP is only ~50% accurate.
-     more sites   → raise SITE_CHANCE (e.g. 0.08)
-     fewer sites  → lower SITE_CHANCE (e.g. 0.02)
-     more spacing → raise SITE_CELL   (12 or more)
-     thicker rock walls between sites → raise MIN_GAP            */
-const SITE_CELL=10;       // super-cell size in chunks (10 → 160×160 blocks)
-const SITE_CHANCE=0.04;   // 0..1 — chance per super-cell to host a site (and, separately, a ghost)
-const MIN_GAP=8;          // guaranteed solid rock between two sites (blocks)
+function setSens(m){sensMult=Math.min(3,Math.max(0.2,m));SENS=SENS_DEF*sensMult;try{localStorage.setItem('ds_sens2',String(sensMult));}catch(e){}}
+const SITE_CELL=10;
+const SITE_CHANCE=0.06;
+const GHOST_CHANCE=SITE_CHANCE/3;
+const MIN_GAP=8;
 const CELL_BLOCKS=SITE_CELL*16;
-
 const qs=new URLSearchParams(location.search);
 const SEED=(parseInt(qs.get('seed'),10)||((Math.random()*2**31)|0))|0;
-
-/* ---------------- rng / noise ---------------- */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
 function hash2i(x,z,s){let h=(Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(s,974634617))|0;h^=h>>>13;h=Math.imul(h,1274126177);h^=h>>>16;return h>>>0;}
 const lerp=(a,b,t)=>a+(b-a)*t;
 const clamp=THREE.MathUtils.clamp;
+function ss(a,b,x){const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);}
 function hash2f(x,z,s){return hash2i(x,z,s)/2147483648-1;}
-function vnoise(x,z,s){
-  const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi;
-  const u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);
-  return lerp(lerp(hash2f(xi,zi,s),hash2f(xi+1,zi,s),u),lerp(hash2f(xi,zi+1,s),hash2f(xi+1,zi+1,s),u),v);
-}
-function heightAt(wx,wz){
-  return 60+Math.round(vnoise(wx*0.043,wz*0.043,SEED^0xA17)*TERRAIN_AMP+vnoise(wx*0.11,wz*0.11,SEED^0xB29)*TERRAIN_AMP*0.5);
-}
-
-/* ---------------- block registry ----------------
-   pick = break time WITH the pickaxe (near-instant on everything except
-   deepslate, which puts up a brief fight); hand = bare hands.          */
-const AIR=0,GRASS=1,DIRT=2,STONE=3,DEEPSLATE=4,LOG=5,LEAVES=6,BEDROCK=7;
+function vnoise(x,z,s){const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi;const u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);return lerp(lerp(hash2f(xi,zi,s),hash2f(xi+1,zi,s),u),lerp(hash2f(xi,zi+1,s),hash2f(xi+1,zi+1,s),u),v);}
+function heightAt(wx,wz){const ripple=vnoise(wx*0.043,wz*0.043,SEED^0xA17)*TERRAIN_AMP+vnoise(wx*0.11,wz*0.11,SEED^0xB29)*TERRAIN_AMP*0.5;const cont=vnoise(wx*0.0033,wz*0.0033,SEED^0x0CEA);const lake=vnoise(wx*0.013,wz*0.013,SEED^0x1A4E);return 60+Math.round(ripple-ss(0.06,-0.5,cont)*15-ss(-0.6,-0.86,lake)*9);}
+const AIR=0,GRASS=1,DIRT=2,STONE=3,DEEPSLATE=4,LOG=5,LEAVES=6,BEDROCK=7,SAND=8,WATER=9,KELP=10,CHEST=11,PLANKS=12,OBSIDIAN=13,GLOW=14,HOPPER=15;
 const BLOCK_DEF={
-  [GRASS]:    {name:'Grass Block',tiles:[1,1,2,0,1,1],hand:0.9, pick:0.05,color:0x6da84e},
-  [DIRT]:     {name:'Dirt',       tiles:[2,2,2,2,2,2],hand:0.75,pick:0.05,color:0x866043},
-  [STONE]:    {name:'Stone',      tiles:[3,3,3,3,3,3],hand:6.0, pick:0.05,color:0x7f7f7f},
-  [DEEPSLATE]:{name:'Deepslate',  tiles:[4,4,4,4,4,4],hand:8.5, pick:0.4, color:0x50525a},
-  [LOG]:      {name:'Oak Log',    tiles:[5,5,6,6,5,5],hand:2.7, pick:0.05,color:0x6b5032},
-  [LEAVES]:   {name:'Oak Leaves', tiles:[7,7,7,7,7,7],hand:0.35,pick:0.05,color:0x3a702c},
-  [BEDROCK]:  {name:'Bedrock',    tiles:[8,8,8,8,8,8],hand:Infinity,pick:Infinity,color:0x3c3c3c},
+  [GRASS]:{name:'Grass Block',tiles:[1,1,2,0,1,1],hand:0.9,pick:0.05,color:0x6da84e},
+  [DIRT]:{name:'Dirt',tiles:[2,2,2,2,2,2],hand:0.75,pick:0.05,color:0x866043},
+  [STONE]:{name:'Stone',tiles:[3,3,3,3,3,3],hand:6.0,pick:0.05,color:0x7f7f7f},
+  [DEEPSLATE]:{name:'Deepslate',tiles:[4,4,4,4,4,4],hand:8.5,pick:0.4,color:0x50525a},
+  [LOG]:{name:'Oak Log',tiles:[5,5,6,6,5,5],hand:2.7,pick:0.05,color:0x6b5032},
+  [LEAVES]:{name:'Oak Leaves',tiles:[7,7,7,7,7,7],hand:0.35,pick:0.05,color:0x3a702c},
+  [BEDROCK]:{name:'Bedrock',tiles:[8,8,8,8,8,8],hand:Infinity,pick:Infinity,color:0x3c3c3c},
+  [SAND]:{name:'Sand',tiles:[9,9,9,9,9,9],hand:0.75,pick:0.05,color:0xd8cb9b},
+  [WATER]:{name:'Water',tiles:[0,0,0,0,0,0],hand:Infinity,pick:Infinity,color:0x4f7fd9},
+  [KELP]:{name:'Kelp',tiles:[10,10,10,10,10,10],hand:0.05,pick:0.05,color:0x2f8f4a},
+  [CHEST]:{name:'Chest',tiles:[11,11,11,11,11,11],hand:1.4,pick:0.3,color:0x966a3a},
+  [PLANKS]:{name:'Oak Planks',tiles:[12,12,12,12,12,12],hand:1.2,pick:0.05,color:0xb48c58},
+  [OBSIDIAN]:{name:'Obsidian',tiles:[13,13,13,13,13,13],hand:40,pick:2.8,color:0x1c1030},
+  [GLOW]:{name:'Glowstone',tiles:[14,14,14,14,14,14],hand:0.9,pick:0.05,color:0xf0c860},
+  [HOPPER]:{name:'Hopper',tiles:[15,15,15,15,15,15],hand:1.6,pick:0.3,color:0x4a4a52},
 };
-
-/* ---------------- texture atlas (procedural pixel art) ---------------- */
+const isSolid=b=>b!==AIR&&b!==WATER&&b!==KELP;
 function buildAtlas(){
   const cv=document.createElement('canvas');cv.width=cv.height=64;
   const g=cv.getContext('2d');
   const R=mulberry32(0x51A7E);
-  const px=(t,fn)=>{const ox=(t%4)*16,oy=((t/4)|0)*16;
-    for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=fn(x,y);g.fillRect(ox+x,oy+y,1,1);}};
+  const px=(t,fn)=>{const ox=(t%4)*16,oy=((t/4)|0)*16;for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=fn(x,y);g.fillRect(ox+x,oy+y,1,1);}};
   const cl=(r,gr,b,v)=>{const d=(R()*2-1)*v;return`rgb(${(r+d)|0},${(gr+d)|0},${(b+d)|0})`;};
-  px(0,()=>R()<0.06?cl(88,140,52,10):cl(112,168,70,13));                                   // grass top
-  px(1,(x,y)=>{if(y<3||(y===3&&R()<0.55))return cl(106,160,66,12);return cl(134,96,67,11);});// grass side
-  px(2,()=>R()<0.08?cl(110,78,52,8):cl(134,96,67,11));                                      // dirt
-  px(3,()=>R()<0.08?cl(105,105,108,6):cl(128,128,131,9));                                   // stone
-  px(4,(x)=>{const gr=(x%4===0)?-10:(x%4===2?6:0);return cl(78+gr,80+gr,86+gr,6);});         // deepslate
-  px(5,(x)=>{const s=(x%4<2)?-16:6;return cl(107+s,80+s*0.7,50+s*0.5,7);});                  // log side
-  px(6,(x,y)=>{const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5));const r=((d|0)%2===0)?12:-8;
-    const e=d>6.5?-25:0;return cl(140+r+e,105+r*0.8+e,66+r*0.6+e,6);});                      // log top
-  px(7,()=>{const r=R();return r<0.16?cl(30,66,24,8):r<0.3?cl(74,126,52,10):cl(52,100,40,12);});// leaves
-  px(8,(x,y)=>{const b=(((x>>1)+(y>>1))%2===0)?72:46;return cl(b,b,b,14);});                 // bedrock
+  px(0,()=>R()<0.06?cl(88,140,52,10):cl(112,168,70,13));
+  px(1,(x,y)=>{if(y<3||(y===3&&R()<0.55))return cl(106,160,66,12);return cl(134,96,67,11);});
+  px(2,()=>R()<0.08?cl(110,78,52,8):cl(134,96,67,11));
+  px(3,()=>R()<0.08?cl(105,105,108,6):cl(128,128,131,9));
+  px(4,(x)=>{const gr=(x%4===0)?-10:(x%4===2?6:0);return cl(78+gr,80+gr,86+gr,6);});
+  px(5,(x)=>{const s=(x%4<2)?-16:6;return cl(107+s,80+s*0.7,50+s*0.5,7);});
+  px(6,(x,y)=>{const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5));const r=((d|0)%2===0)?12:-8;const e=d>6.5?-25:0;return cl(140+r+e,105+r*0.8+e,66+r*0.6+e,6);});
+  px(7,()=>{const r=R();return r<0.16?cl(30,66,24,8):r<0.3?cl(74,126,52,10):cl(52,100,40,12);});
+  px(8,(x,y)=>{const b=(((x>>1)+(y>>1))%2===0)?72:46;return cl(b,b,b,14);});
+  px(9,()=>R()<0.1?cl(198,183,134,8):cl(218,204,156,10));
+  px(10,(x)=>{const s=(x%4<2)?26:-8;return cl(30+s,108+s,54+s,12);});
+  px(11,(x,y)=>{if(x===0||x===15||y===0||y===15)return cl(74,50,28,6);if(y===5)return cl(112,76,42,8);if((y===6||y===7||y===8)&&(x===7||x===8))return cl(168,168,176,10);return cl(150,106,60,10);});
+  px(12,(x,y)=>{if(y%4===3)return cl(128,96,56,8);return cl(180,142,90,9);});
+  px(13,()=>R()<0.06?cl(66,48,104,10):cl(20,14,34,7));
+  px(14,()=>R()<0.3?cl(255,232,140,14):cl(226,182,84,14));
+  px(15,(x,y)=>{if(x>=4&&x<=11&&y>=3&&y<=8)return cl(20,20,24,5);if(x>=6&&x<=9&&y>=9&&y<=12)return cl(28,28,34,5);if(x===0||x===15||y===0||y===15)return cl(54,54,60,6);return cl(70,70,78,7);});
   return cv;
 }
 function crackTex(stage){
   const cv=document.createElement('canvas');cv.width=cv.height=16;
   const g=cv.getContext('2d');g.strokeStyle='rgba(12,12,12,.9)';g.lineWidth=1;
   const R=mulberry32(77+stage*13);
-  for(let i=0;i<3+stage*2;i++){let x=R()*16,y=R()*16;g.beginPath();g.moveTo(x,y);
-    for(let s=0;s<3+stage;s++){x+=(R()-0.5)*7;y+=(R()-0.5)*7;g.lineTo(x,y);}g.stroke();}
-  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
-  return t;
+  for(let i=0;i<3+stage*2;i++){let x=R()*16,y=R()*16;g.beginPath();g.moveTo(x,y);for(let s=0;s<3+stage;s++){x+=(R()-0.5)*7;y+=(R()-0.5)*7;g.lineTo(x,y);}g.stroke();}
+  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t;
+}
+function buildWaterTex(){
+  const cv=document.createElement('canvas');cv.width=cv.height=16;
+  const g=cv.getContext('2d');
+  const R=mulberry32(0xA7EA);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const w=Math.sin(y*0.9+x*0.35)*0.5+Math.sin(y*1.7+x*0.8)*0.3+(R()-0.5)*0.3;
+    const spark=R()<0.02;
+    g.fillStyle=spark?`rgb(${170+w*20|0},${210+w*20|0},${245|0})`:`rgb(${52+w*18|0},${104+w*26|0},${214+w*22|0})`;
+    g.fillRect(x,y,1,1);
+  }
+  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;
 }
 const atlasCanvas=buildAtlas();
 const atlasTex=new THREE.CanvasTexture(atlasCanvas);
-atlasTex.magFilter=atlasTex.minFilter=THREE.NearestFilter;atlasTex.generateMipmaps=false;
-atlasTex.colorSpace=THREE.SRGBColorSpace;
+atlasTex.magFilter=atlasTex.minFilter=THREE.NearestFilter;atlasTex.generateMipmaps=false;atlasTex.colorSpace=THREE.SRGBColorSpace;
 const crackTexs=[0,1,2,3,4].map(crackTex);
-
-/* ---------------- three.js core ---------------- */
+const waterTex=buildWaterTex();
 const canvas=document.getElementById('game');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -408,24 +265,22 @@ renderer.setClearColor(SKY);
 renderer.autoClear=false;
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(SKY,FOG_NEAR,FOG_FAR);
-/* far plane is generous so long-range ESP markers (fog-free) stay visible */
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.08,1200);
 camera.rotation.order='YXZ';
 const worldMat=new THREE.MeshBasicMaterial({map:atlasTex,vertexColors:true});
-
-/* ---------------- world data ---------------- */
+const uTime={value:0};
+const waterMat=new THREE.MeshBasicMaterial({map:waterTex,transparent:true,opacity:0.72,depthWrite:false,vertexColors:true,side:THREE.DoubleSide});
+waterMat.onBeforeCompile=sh=>{
+  sh.uniforms.uTime=uTime;
+  sh.vertexShader='uniform float uTime;\nattribute float aWave;\n'+sh.vertexShader.replace('#include <begin_vertex>',
+`#include <begin_vertex>
+vec4 dsWp=modelMatrix*vec4(transformed,1.0);
+transformed.y+=aWave*(sin(dsWp.x*0.55+uTime*1.4)+sin(dsWp.z*0.75+uTime*1.9))*0.06;`);
+};
 const chunks=new Map();
 const ckey=(cx,cz)=>cx+','+cz;
 
-/* ---------------- dig sites + ghost markers ----------------
-   Real sites: one max per super-cell, footprint strictly inside the cell
-   with a margin of MIN_GAP/2 on every side → sites in neighbouring cells
-   are separated by ≥ MIN_GAP blocks of rock, always. No overlaps
-   possible. Square footprint 20-30, height 10-30, carved ENTIRELY inside
-   the deepslate band (top y -1..-15, floor clamped ≥ -58).
-   Ghosts: same footprint logic, different salt, nothing carved. The
-   chunkfinder draws both identically → ~50% of marks are false.
-   NOTE: nothing in the UI may reveal which is which — dig and see.     */
+/* ---- bases: rectangular stash halls, square farms/vaults ---- */
 const siteCache=new Map();
 function siteForCell(ix,iz){
   const k=ix+','+iz;
@@ -434,26 +289,34 @@ function siteForCell(ix,iz){
   const r=hash2i(ix,iz,SEED^0x51A7);
   if((r%1000)<SITE_CHANCE*1000){
     const rr=mulberry32(r^0x9E3779B9);
-    const size=20+Math.floor(rr()*11);          // 20..30 blocks per side
-    const height=10+Math.floor(rr()*21);        // 10..30 blocks tall
+    const type=['kelp','stash','vault'][Math.floor(rr()*3)];
+    let sizeX,sizeZ;
+    if(type==='stash'){
+      sizeX=24+Math.floor(rr()*7);
+      sizeZ=14+Math.floor(rr()*5);
+    }else{
+      sizeX=20+Math.floor(rr()*11);
+      sizeZ=sizeX;
+    }
+    const height=10+Math.floor(rr()*21);
     const m=Math.ceil(MIN_GAP/2);
-    const span=CELL_BLOCKS-2*m-size;            // jitter room inside the cell
-    const x0=ix*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
-    const z0=iz*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
-    const yTop=-1-Math.floor(rr()*15);          // -1..-15 → always inside deepslate
-    const yBot=Math.max(yTop-height,-58);       // never touches bedrock (-60)
-    s={x0,z0,x1:x0+size-1,z1:z0+size-1,yTop,yBot};
+    const spanX=CELL_BLOCKS-2*m-sizeX;
+    const spanZ=CELL_BLOCKS-2*m-sizeZ;
+    const x0=ix*CELL_BLOCKS+m+Math.floor(rr()*(spanX+1));
+    const z0=iz*CELL_BLOCKS+m+Math.floor(rr()*(spanZ+1));
+    const yTop=-1-Math.floor(rr()*15);
+    const yBot=Math.max(yTop-height,-58);
+    s={x0,z0,x1:x0+sizeX-1,z1:z0+sizeZ-1,yTop,yBot,type};
   }
   siteCache.set(k,s);return s;
 }
-/* ghost marker — drawn by the ESP, nothing carved (x/z footprint only) */
 const ghostCache=new Map();
 function ghostForCell(ix,iz){
   const k=ix+','+iz;
   if(ghostCache.has(k))return ghostCache.get(k);
   let s=null;
-  const r=hash2i(ix,iz,SEED^0x6E6E6E);          // different salt → independent of real sites
-  if((r%1000)<SITE_CHANCE*1000){
+  const r=hash2i(ix,iz,SEED^0x6E6E6E);
+  if((r%1000)<GHOST_CHANCE*1000){
     const rr=mulberry32(r^0xDEADBEEF);
     const size=20+Math.floor(rr()*11);
     const m=Math.ceil(MIN_GAP/2);
@@ -468,38 +331,84 @@ function cellOf(cx){return Math.floor(cx/SITE_CELL);}
 
 function genChunkData(cx,cz){
   const data=new Uint8Array(256*CH);
-  // layer cake: grass y60 · dirt 59-54 · stone 53-0 · deepslate -1..-59 · bedrock -60
-  // (h shifts ±2 with the surface ripple, dirt is always the 6 blocks under grass)
   for(let lz=0;lz<16;lz++)for(let lx=0;lx<16;lx++){
     const wx=cx*16+lx,wz=cz*16+lz,h=heightAt(wx,wz);
+    const sandy=h<=SEA_LEVEL+1;
     for(let y=Y_MIN;y<=Y_MAX;y++){
       let b=AIR;
-      if(y===h)b=GRASS;
-      else if(y<h&&y>h-7)b=DIRT;
-      else if(y<=h-7&&y>=0)b=STONE;
-      else if(y<0&&y>=-59)b=DEEPSLATE;
+      if(y===h)b=sandy?SAND:GRASS;
+      else if(y>h)b=y<=SEA_LEVEL?WATER:AIR;
+      else if(y>h-7)b=sandy?(y>h-4?SAND:STONE):DIRT;
+      else if(y>=0)b=STONE;
+      else if(y>=-59)b=DEEPSLATE;
       else if(y===-60)b=BEDROCK;
       if(b)data[(y-Y_MIN)*256+lz*16+lx]=b;
     }
   }
-  // carve the dig site (if any) of this chunk's super-cell — sites are
-  // constrained inside their own cell, so this is the only one that can
-  // possibly reach into this chunk. Ghosts carve nothing.
   {
     const s=siteForCell(cellOf(cx),cellOf(cz));
     if(s){
       const x0=Math.max(s.x0,cx*16),x1=Math.min(s.x1,cx*16+15);
       const z0=Math.max(s.z0,cz*16),z1=Math.min(s.z1,cz*16+15);
-      if(x0<=x1&&z0<=z1)
-        for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)
-          for(let y=s.yBot;y<=s.yTop;y++)data[(y-Y_MIN)*256+(z-cz*16)*16+(x-cx*16)]=AIR;
+      if(x0<=x1&&z0<=z1){
+        const put=(wx,wy,wz,b)=>{
+          const lx=wx-cx*16,lz=wz-cz*16;
+          if(lx<0||lx>15||lz<0||lz>15||wy<Y_MIN||wy>Y_MAX)return;
+          data[(wy-Y_MIN)*256+lz*16+lx]=b;
+        };
+        const cxm=(s.x0+s.x1)>>1,czm=(s.z0+s.z1)>>1;
+        const corner=(x,z)=>(x===s.x0||x===s.x1)&&(z===s.z0||z===s.z1);
+        for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){
+          for(let y=s.yBot;y<=s.yTop;y++)put(x,y,z,AIR);
+          if(s.type==='kelp'){
+            const h=s.yTop-s.yBot;
+            const waterTop=Math.min(s.yBot+Math.max(3,(h*0.55)|0),s.yTop-1);
+            put(x,s.yBot,z,SAND);
+            for(let y=s.yBot+1;y<=waterTop;y++)put(x,y,z,WATER);
+            if((x-s.x0)%2===0&&(z-s.z0)%2===0&&hash2i(x,z,SEED^0x3E7)%10<8)
+              for(let y=s.yBot+1;y<=waterTop;y++)put(x,y,z,KELP);
+            if((x-s.x0)%7===3&&(z-s.z0)%7===3)put(x,s.yTop,z,GLOW);
+          }else if(s.type==='stash'){
+            /* STORAGE HALL — rectangular: central stone walkway,
+               hopper+chest stations lining both long walls */
+            if(corner(x,z)){for(let y=s.yBot;y<=s.yTop;y++)put(x,y,z,LOG);continue;}
+            const inWalk=z>=czm-1&&z<=czm+2;
+            if(inWalk){
+              put(x,s.yBot,z,STONE);
+              if((x-s.x0)%4===2&&(z===czm||z===czm+1))put(x,s.yTop,z,GLOW);
+            }else{
+              const isStationRow=(z===s.z0||z===s.z1);
+              if(isStationRow){
+                const rel=x-s.x0-1;
+                if(rel>=0&&rel%3<2&&x<=s.x1-1){
+                  put(x,s.yBot,z,HOPPER);
+                  put(x,s.yBot+1,z,CHEST);
+                }else{
+                  put(x,s.yBot,z,PLANKS);
+                }
+                if((x-s.x0)%6===3)put(x,s.yTop,z,GLOW);
+              }else{
+                put(x,s.yBot,z,PLANKS);
+              }
+            }
+          }else{
+            put(x,s.yBot,z,OBSIDIAN);
+            if(corner(x,z)){for(let y=s.yBot+1;y<=s.yTop;y++)put(x,y,z,OBSIDIAN);continue;}
+            if(Math.abs(x-cxm)<=1&&Math.abs(z-czm)<=1)put(x,s.yBot+1,z,OBSIDIAN);
+            if(x===cxm&&z===czm)put(x,s.yBot+2,z,CHEST);
+            if(Math.abs(x-cxm)===2&&Math.abs(z-czm)===2)put(x,s.yBot+1,z,CHEST);
+            if((x-s.x0)%6===3&&(z-s.z0)%6===3)put(x,s.yTop,z,GLOW);
+          }
+        }
+      }
     }
   }
-  // trees (deterministic per world column, so chunk borders agree)
   for(let tx=cx*16-2;tx<cx*16+18;tx++)for(let tz=cz*16-2;tz<cz*16+18;tz++){
     const r=hash2i(tx,tz,SEED^0x7EE5);
     if(r%1000>=14)continue;
-    const h=heightAt(tx,tz),th=4+((r>>>10)%3);
+    const h=heightAt(tx,tz);
+    if(h<=SEA_LEVEL+1)continue;
+    const th=4+((r>>>10)%3);
     const put=(wx,wy,wz,b,force)=>{
       const lx=wx-cx*16,lz=wz-cz*16;
       if(lx<0||lx>15||lz<0||lz>15||wy<Y_MIN||wy>Y_MAX)return;
@@ -520,7 +429,7 @@ function genChunkData(cx,cz){
 }
 function ensureData(cx,cz){
   const k=ckey(cx,cz);let c=chunks.get(k);
-  if(!c){c={cx,cz,data:genChunkData(cx,cz),mesh:null,meshed:false};chunks.set(k,c);}
+  if(!c){c={cx,cz,data:genChunkData(cx,cz),mesh:null,wmesh:null,dmesh:null,dwmesh:null,meshed:false};chunks.set(k,c);}
   return c;
 }
 function getBlock(wx,wy,wz){
@@ -538,14 +447,13 @@ function setBlock(wx,wy,wz,b){
 }
 function remesh(cx,cz){const c=chunks.get(ckey(cx,cz));if(c&&c.meshed)meshChunk(cx,cz);}
 
-/* ---------------- chunk mesher (face culling + vertex AO) ---------------- */
 const FACES=[
   {d:[-1,0,0],c:[[0,1,0],[0,0,0],[0,1,1],[0,0,1]],u:2,v:1,shade:.60},
-  {d:[ 1,0,0],c:[[1,1,1],[1,0,1],[1,1,0],[1,0,0]],u:2,v:1,shade:.66},
+  {d:[1,0,0],c:[[1,1,1],[1,0,1],[1,1,0],[1,0,0]],u:2,v:1,shade:.66},
   {d:[0,-1,0],c:[[1,0,1],[0,0,1],[1,0,0],[0,0,0]],u:0,v:2,shade:.50},
-  {d:[0, 1,0],c:[[0,1,1],[1,1,1],[0,1,0],[1,1,0]],u:0,v:2,shade:1.0},
+  {d:[0,1,0],c:[[0,1,1],[1,1,1],[0,1,0],[1,1,0]],u:0,v:2,shade:1.0},
   {d:[0,0,-1],c:[[1,0,0],[0,0,0],[1,1,0],[0,1,0]],u:0,v:1,shade:.80},
-  {d:[0,0, 1],c:[[0,0,1],[1,0,1],[0,1,1],[1,1,1]],u:0,v:1,shade:.80},
+  {d:[0,0,1],c:[[0,0,1],[1,0,1],[0,1,1],[1,1,1]],u:0,v:1,shade:.80},
 ];
 const AO_LUT=[0.50,0.68,0.84,1.0];
 function meshChunk(cx,cz){
@@ -564,52 +472,104 @@ function meshChunk(cx,cz){
     return P[(y-Y_MIN)*324+(z+1)*18+(x+1)];
   };
   const positions=[],uvs=[],colors=[],indices=[];
-  const E=0.018; // uv inset against atlas bleeding
+  const dpositions=[],duvs=[],dcolors=[],dindices=[];
+  const E=0.018;
   for(let y=Y_MIN;y<=Y_MAX;y++)for(let lz=0;lz<16;lz++)for(let lx=0;lx<16;lx++){
     const b=P[(y-Y_MIN)*324+(lz+1)*18+(lx+1)];
-    if(!b)continue;
+    if(!b||b===WATER)continue;
     const tiles=BLOCK_DEF[b].tiles;
+    const deep=y<DEEP_Y;
+    const pA=deep?dpositions:positions,uA=deep?duvs:uvs,cA=deep?dcolors:colors,iA=deep?dindices:indices;
     for(let f=0;f<6;f++){
       const F=FACES[f];
-      if(pget(lx+F.d[0],y+F.d[1],lz+F.d[2])!==AIR)continue;
+      if(isSolid(pget(lx+F.d[0],y+F.d[1],lz+F.d[2])))continue;
       const tu=tiles[f]%4,tv=(tiles[f]/4)|0;
-      const vi=positions.length/3,ao=[0,0,0,0];
+      const vi=pA.length/3,ao=[0,0,0,0];
       for(let cn=0;cn<4;cn++){
         const cc=F.c[cn];
-        positions.push(lx+cc[0],y+cc[1],lz+cc[2]);
+        pA.push(lx+cc[0],y+cc[1],lz+cc[2]);
         const uc=cc[F.u],vc=cc[F.v];
-        uvs.push((tu+E+uc*(1-2*E))/4,((3-tv)+E+vc*(1-2*E))/4);
-        // ambient occlusion: two edge neighbours + corner neighbour of the face
+        uA.push((tu+E+uc*(1-2*E))/4,((3-tv)+E+vc*(1-2*E))/4);
         const nbx=lx+F.d[0],nby=y+F.d[1],nbz=lz+F.d[2];
         const su=cc[F.u]?1:-1,sv=cc[F.v]?1:-1;
         const o1=[0,0,0];o1[F.u]=su;const o2=[0,0,0];o2[F.v]=sv;
-        const s1=pget(nbx+o1[0],nby+o1[1],nbz+o1[2])!==AIR;
-        const s2=pget(nbx+o2[0],nby+o2[1],nbz+o2[2])!==AIR;
-        const co=pget(nbx+o1[0]+o2[0],nby+o1[1]+o2[1],nbz+o1[2]+o2[2])!==AIR;
+        const s1=isSolid(pget(nbx+o1[0],nby+o1[1],nbz+o1[2]));
+        const s2=isSolid(pget(nbx+o2[0],nby+o2[1],nbz+o2[2]));
+        const co=isSolid(pget(nbx+o1[0]+o2[0],nby+o1[1]+o2[1],nbz+o1[2]+o2[2]));
         const a=(s1&&s2)?0:3-((s1?1:0)+(s2?1:0)+(co?1:0));
         ao[cn]=a;
-        const l=F.shade*AO_LUT[a];
-        colors.push(l,l,l);
+        const l=b===GLOW?1:F.shade*AO_LUT[a];
+        cA.push(l,l,l);
       }
-      if(ao[0]+ao[3]>ao[1]+ao[2])indices.push(vi,vi+1,vi+3,vi,vi+3,vi+2);
-      else indices.push(vi,vi+1,vi+2,vi+2,vi+1,vi+3);
+      if(ao[0]+ao[3]>ao[1]+ao[2])iA.push(vi,vi+1,vi+3,vi,vi+3,vi+2);
+      else iA.push(vi,vi+1,vi+2,vi+2,vi+1,vi+3);
     }
   }
   if(c.mesh){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh=null;}
-  if(positions.length){
-    const geo=new THREE.BufferGeometry();
-    geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
-    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
-    geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
-    geo.setIndex(indices);
-    const m=new THREE.Mesh(geo,worldMat);
+  if(c.dmesh){scene.remove(c.dmesh);c.dmesh.geometry.dispose();c.dmesh=null;}
+  const mkOpaque=(pos,uv,col,idx)=>{
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+    g.setIndex(idx);
+    const m=new THREE.Mesh(g,worldMat);
     m.position.set(cx*16,0,cz*16);m.matrixAutoUpdate=false;m.updateMatrix();
-    scene.add(m);c.mesh=m;
+    scene.add(m);return m;
+  };
+  if(positions.length)c.mesh=mkOpaque(positions,uvs,colors,indices);
+  if(dpositions.length)c.dmesh=mkOpaque(dpositions,duvs,dcolors,dindices);
+  const wS={p:[],u:[],c:[],w:[],i:[]},wD={p:[],u:[],c:[],w:[],i:[]};
+  for(let y=Y_MIN;y<=Y_MAX;y++)for(let lz=0;lz<16;lz++)for(let lx=0;lx<16;lx++){
+    if(P[(y-Y_MIN)*324+(lz+1)*18+(lx+1)]!==WATER)continue;
+    const T=y<DEEP_Y?wD:wS;
+    const surf=pget(lx,y+1,lz)===AIR;
+    const t=surf?0.875:1;
+    if(surf){
+      const vi=T.p.length/3;
+      T.p.push(lx,y+0.875,lz,lx+1,y+0.875,lz,lx+1,y+0.875,lz+1,lx,y+0.875,lz+1);
+      T.u.push(0,0,1,0,1,1,0,1);
+      T.c.push(1,1,1,1,1,1,1,1,1,1,1,1);
+      T.w.push(1,1,1,1);
+      T.i.push(vi,vi+1,vi+2,vi,vi+2,vi+3);
+    }
+    if(pget(lx,y-1,lz)===AIR){
+      const vi=T.p.length/3;
+      T.p.push(lx,y,lz,lx+1,y,lz,lx+1,y,lz+1,lx,y,lz+1);
+      T.u.push(0,0,1,0,1,1,0,1);
+      for(let i=0;i<4;i++)T.c.push(.62,.62,.62);
+      T.w.push(0,0,0,0);
+      T.i.push(vi,vi+1,vi+2,vi,vi+2,vi+3);
+    }
+    const sides=[[-1,0,lx,lz,lx,lz+1],[1,0,lx+1,lz,lx+1,lz+1],[0,-1,lx,lz,lx+1,lz],[0,1,lx,lz+1,lx+1,lz+1]];
+    for(const [dx,dz,ax,az,bx2,bz2] of sides){
+      if(pget(lx+dx,y,lz+dz)!==AIR)continue;
+      const vi=T.p.length/3;
+      T.p.push(ax,y,az,bx2,y,bz2,bx2,y+t,bz2,ax,y+t,az);
+      T.u.push(0,0,1,0,1,t,0,t);
+      for(let i=0;i<4;i++)T.c.push(.82,.82,.82);
+      T.w.push(0,0,surf?1:0,surf?1:0);
+      T.i.push(vi,vi+1,vi+2,vi,vi+2,vi+3);
+    }
   }
+  if(c.wmesh){scene.remove(c.wmesh);c.wmesh.geometry.dispose();c.wmesh=null;}
+  if(c.dwmesh){scene.remove(c.dwmesh);c.dwmesh.geometry.dispose();c.dwmesh=null;}
+  const mkWater=(T)=>{
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(T.p,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(T.u,2));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(T.c,3));
+    g.setAttribute('aWave',new THREE.Float32BufferAttribute(T.w,1));
+    g.setIndex(T.i);
+    const m=new THREE.Mesh(g,waterMat);
+    m.position.set(cx*16,0,cz*16);m.matrixAutoUpdate=false;m.updateMatrix();
+    scene.add(m);return m;
+  };
+  if(wS.p.length)c.wmesh=mkWater(wS);
+  if(wD.p.length)c.dwmesh=mkWater(wD);
   c.meshed=true;
 }
 
-/* ---------------- chunk streaming ---------------- */
 let queue=[],lastPC=null,bootTotal=0;
 function refreshStreaming(force){
   const pcx=Math.floor(player.pos.x)>>4,pcz=Math.floor(player.pos.z)>>4;
@@ -623,10 +583,14 @@ function refreshStreaming(force){
   }
   queue.sort((a,b)=>a[2]-b[2]);
   for(const c of chunks.values()){
-    if(!c.mesh)continue;
+    if(!c.mesh&&!c.wmesh&&!c.dmesh&&!c.dwmesh)continue;
     const dx=c.cx-pcx,dz=c.cz-pcz;
     if(dx*dx+dz*dz>(RENDER_R+2)*(RENDER_R+2)){
-      scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh=null;c.meshed=false;
+      if(c.mesh){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh=null;}
+      if(c.wmesh){scene.remove(c.wmesh);c.wmesh.geometry.dispose();c.wmesh=null;}
+      if(c.dmesh){scene.remove(c.dmesh);c.dmesh.geometry.dispose();c.dmesh=null;}
+      if(c.dwmesh){scene.remove(c.dwmesh);c.dwmesh.geometry.dispose();c.dwmesh=null;}
+      c.meshed=false;
     }
   }
   refreshESP();
@@ -640,47 +604,69 @@ function processQueue(budgetMs){
   }
 }
 
-/* ---------------- player ---------------- */
-const player={pos:new THREE.Vector3(8.5,0,8.5),vel:new THREE.Vector3(),onGround:false,yaw:Math.PI*0.75,pitch:-0.12};
-player.pos.y=heightAt(8,8)+1;
-let gliding=false,glideLaunchT=0,pickaxeOn=false,tridentOn=false;
-let riptideCD=0,ripTrail=0;
+/* ---- fake anticheat ---- */
+const deepPending=new Set();
+const deepUnlocked=new Set();
+const discoveredSites=new Set();
+let deepFlushed=0;
+function updateDeepVisibility(){
+  const fcOn=cheat.freecam.on&&started;
+  const camDeep=fcOn&&fc.pos.y<DEEP_Y;
+  for(const c of chunks.values()){
+    const vis=!fcOn||(camDeep&&deepUnlocked.has(ckey(c.cx,c.cz)));
+    if(c.dmesh)c.dmesh.visible=vis;
+    if(c.dwmesh)c.dwmesh.visible=vis;
+  }
+  if(camDeep){
+    const k=ckey(Math.floor(fc.pos.x)>>4,Math.floor(fc.pos.z)>>4);
+    if(!deepUnlocked.has(k))toastOnce('acHint','ANTI-CHEAT · deepslate chunks not synced — dig below y5 and relog','cheat');
+  }
+}
+const BASE_NAMES={kelp:'KELP FARM',stash:'STORAGE HALL',vault:'OBSIDIAN VAULT'};
+function checkSiteDiscovery(){
+  if(player.pos.y>=DEEP_Y)return;
+  const ci=cellOf(Math.floor(player.pos.x)>>4),cj=cellOf(Math.floor(player.pos.z)>>4);
+  const s=siteForCell(ci,cj);
+  if(!s)return;
+  const x=Math.floor(player.pos.x),z=Math.floor(player.pos.z);
+  if(x<s.x0||x>s.x1||z<s.z0||z>s.z1)return;
+  if(!player.onGround)return;
+  if(player.pos.y>s.yBot+2.5||player.pos.y<s.yBot-3.5)return;
+  const key=ci+','+cj;
+  if(discoveredSites.has(key))return;
+  discoveredSites.add(key);
+  let n=0;
+  const cx0=Math.floor(s.x0/16),cx1=Math.floor(s.x1/16);
+  const cz0=Math.floor(s.z0/16),cz1=Math.floor(s.z1/16);
+  for(let cx=cx0;cx<=cx1;cx++)for(let cz=cz0;cz<=cz1;cz++){
+    const k=ckey(cx,cz);
+    if(!deepUnlocked.has(k)){deepUnlocked.add(k);n++;}
+    deepPending.delete(k);
+  }
+  if(n>0){toast(`ANTI-CHEAT · base found — ${BASE_NAMES[s.type]} · ${n} chunk${n===1?'':'s'} synced to freecam`,'cheat');syncMenuUI();}
+}
 
-/* ---------------- audio (tiny synth) ---------------- */
+/* ---- player ---- */
+function findSpawn(){
+  for(let i=0;i<400;i++){
+    const x=i*3,z=((i*7)%23)-11;
+    const h=heightAt(x,z);
+    if(h>SEA_LEVEL+1)return{x:x+0.5,z:z+0.5,y:h+1};
+  }
+  return{x:8.5,z:8.5,y:heightAt(8,8)+1};
+}
+const spawn=findSpawn();
+const player={pos:new THREE.Vector3(spawn.x,spawn.y,spawn.z),vel:new THREE.Vector3(),onGround:false,yaw:Math.PI*0.75,pitch:-0.12};
+let gliding=false,glideLaunchT=0,pickaxeOn=false,tridentOn=false;
+let riptideCD=0,ripTrail=0,ripWaterT=0;   // ripWaterT: plow-through-water window after a riptide
+let prevInWater=false,playerInWater=false,bubbleT=0;
+
+/* ---- audio ---- */
 const AU={ctx:null,master:null,noise:null,muted:false,rainSrc:null,rainGain:null,
-  init(){if(this.ctx)return;
-    this.ctx=new (window.AudioContext||window.webkitAudioContext)();
-    this.master=this.ctx.createGain();this.master.gain.value=0.42;this.master.connect(this.ctx.destination);
-    const b=this.ctx.createBuffer(1,this.ctx.sampleRate,this.ctx.sampleRate);
-    const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-    this.noise=b;},
-  nz(dur,type,f0,f1,vol){if(!this.ctx||this.muted)return;
-    const t=this.ctx.currentTime,s=this.ctx.createBufferSource();s.buffer=this.noise;
-    const f=this.ctx.createBiquadFilter();f.type=type;
-    f.frequency.setValueAtTime(f0,t);f.frequency.linearRampToValueAtTime(f1,t+dur);
-    const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-    s.connect(f);f.connect(g);g.connect(this.master);s.start(t);s.stop(t+dur);},
-  tone(f0,f1,dur,type,vol){if(!this.ctx||this.muted)return;
-    const t=this.ctx.currentTime,o=this.ctx.createOscillator();o.type=type;
-    o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),t+dur);
-    const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-    o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur);},
-  rainSet(on){
-    if(on){
-      if(!this.ctx||this.rainSrc)return;
-      const s=this.ctx.createBufferSource();s.buffer=this.noise;s.loop=true;
-      const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=1100;
-      const g=this.ctx.createGain();g.gain.value=0;
-      g.gain.linearRampToValueAtTime(this.muted?0:0.055,this.ctx.currentTime+1.2);
-      s.connect(f);f.connect(g);g.connect(this.master);s.start();
-      this.rainSrc=s;this.rainGain=g;
-    }else{
-      if(!this.rainSrc)return;
-      const s=this.rainSrc,g=this.rainGain;
-      try{g.gain.linearRampToValueAtTime(0,this.ctx.currentTime+0.5);s.stop(this.ctx.currentTime+0.6);}catch(e){}
-      this.rainSrc=null;this.rainGain=null;
-    }
-  },
+  init(){if(this.ctx)return;this.ctx=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=0.42;this.master.connect(this.ctx.destination);const b=this.ctx.createBuffer(1,this.ctx.sampleRate,this.ctx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;this.noise=b;},
+  nz(dur,type,f0,f1,vol){if(!this.ctx||this.muted)return;const t=this.ctx.currentTime,s=this.ctx.createBufferSource();s.buffer=this.noise;const f=this.ctx.createBiquadFilter();f.type=type;f.frequency.setValueAtTime(f0,t);f.frequency.linearRampToValueAtTime(f1,t+dur);const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);s.connect(f);f.connect(g);g.connect(this.master);s.start(t);s.stop(t+dur);},
+  tone(f0,f1,dur,type,vol){if(!this.ctx||this.muted)return;const t=this.ctx.currentTime,o=this.ctx.createOscillator();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),t+dur);const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur);},
+  rainSet(on){if(on){if(!this.ctx||this.rainSrc)return;const s=this.ctx.createBufferSource();s.buffer=this.noise;s.loop=true;const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=1100;const g=this.ctx.createGain();g.gain.value=0;g.gain.linearRampToValueAtTime(this.muted?0:0.055,this.ctx.currentTime+1.2);s.connect(f);f.connect(g);g.connect(this.master);s.start();this.rainSrc=s;this.rainGain=g;}else{if(!this.rainSrc)return;const s=this.rainSrc,g=this.rainGain;try{g.gain.linearRampToValueAtTime(0,this.ctx.currentTime+0.5);s.stop(this.ctx.currentTime+0.6);}catch(e){}this.rainSrc=null;this.rainGain=null;}},
   rainVol(){if(this.rainGain&&this.ctx)this.rainGain.gain.value=this.muted?0:0.055;}
 };
 const sfx={
@@ -692,11 +678,12 @@ const sfx={
   thud(){AU.tone(120,40,0.16,'triangle',0.22);AU.nz(0.1,'lowpass',500,120,0.2);},
   riptide(){AU.nz(0.5,'bandpass',2400,260,0.34);AU.tone(160,70,0.42,'triangle',0.16);},
   thunder(){AU.nz(2.4,'lowpass',280,45,0.24);AU.tone(52,26,2.0,'triangle',0.1);},
+  splash(v){AU.nz(0.28,'bandpass',1300,240,0.3*v);AU.tone(300,100,0.2,'sine',0.12*v);},
   ui(){AU.tone(700,920,0.05,'sine',0.08);},
   toggle(){AU.tone(520,640,0.06,'square',0.07);},
 };
 
-/* ---------------- UI helpers ---------------- */
+/* ---- UI ---- */
 const $=id=>document.getElementById(id);
 const toastEl=$('toasts');const shownOnce=new Set();
 function toast(msg,tone){
@@ -708,79 +695,48 @@ function toast(msg,tone){
 }
 function toastOnce(key,msg,tone){if(shownOnce.has(key))return;shownOnce.add(key);toast(msg,tone);}
 
-/* ---------------- input + pointer-lock manager ----------------
-   Failures never trigger the pause screen; they either auto-retry after
-   Chrome's post-Esc cooldown (~1.25s) or drop into fallback "soft" mouse
-   mode (delta-look with hidden cursor + arrow-key turning). Pause only
-   ever appears on a genuine user-initiated unlock (Esc).               */
+/* ---- input + pointer lock ---- */
 const keys={};
 let mouseL=false,mouseR=false,started=false,cheatOpen=false;
 let paused=false,softLock=false;
 let lastUnlockAt=-1e9,lastLockTry=-1e9,lastFailAt=-1e9,lockTimer=null,lockRetries=0;
 let lastSpaceTap=0;
-
 const locked=()=>document.pointerLockElement===canvas;
 const inputOn=()=>started&&!paused&&!cheatOpen&&(locked()||softLock);
-
-function syncCursor(){
-  document.body.classList.toggle('nocursor',started&&!paused&&!cheatOpen&&softLock&&!locked());
-}
+function syncCursor(){document.body.classList.toggle('nocursor',started&&!paused&&!cheatOpen&&softLock&&!locked());}
 function attemptLock(){
   if(locked())return;
   clearTimeout(lockTimer);
   lastLockTry=performance.now();
   let p;
-  try{p=canvas.requestPointerLock();}
-  catch(err){onLockFail();return;}
-  if(p&&p.then)p.then(()=>{},onLockFail);   // promise-based (Chrome); Firefox uses pointerlockerror
+  try{p=canvas.requestPointerLock();}catch(err){onLockFail();return;}
+  if(p&&p.then)p.then(()=>{},onLockFail);
 }
 function onLockFail(){
   const now=performance.now();
-  if(now-lastFailAt<400)return;               // Chrome fires rejection + error event for one failure
+  if(now-lastFailAt<400)return;
   lastFailAt=now;
   if(!started)return;
-  const cooldown=now-lastUnlockAt<3200;       // recently Esc-unlocked → likely Chrome's cooldown
-  if(!softLock){
-    softLock=true;
-    if(!cooldown){
-      toast('Mouse capture unavailable — fallback look mode active','cheat');
-      toastOnce('softTip','Arrow keys also turn the camera · clicking the world retries capture');
-    }
-  }
-  if(cooldown&&lockRetries<2){                // wait out the cooldown, then re-lock seamlessly
-    lockRetries++;
-    clearTimeout(lockTimer);
-    lockTimer=setTimeout(attemptLock,1400);
-  }
+  const cooldown=now-lastUnlockAt<3200;
+  if(!softLock){softLock=true;if(!cooldown){toast('Mouse capture unavailable — fallback look mode active','cheat');toastOnce('softTip','Arrow keys also turn the camera · clicking the world retries capture');}}
+  if(cooldown&&lockRetries<2){lockRetries++;clearTimeout(lockTimer);lockTimer=setTimeout(attemptLock,1400);}
   syncCursor();
 }
 function showPause(){paused=true;$('pause').classList.remove('hidden');syncCursor();}
 function hidePause(){paused=false;$('pause').classList.add('hidden');syncCursor();}
-
 addEventListener('keydown',e=>{
-  if(e.code==='F3'){e.preventDefault();if(started){$('debug').classList.toggle('hidden');}}
+  if(e.code==='F3'){e.preventDefault();if(started){$('debug').classList.toggle('hidden');$('coords').classList.toggle('hidden');}}
   if(e.code==='Space')e.preventDefault();
   if(!e.repeat&&started){
-    // while the ECHO menu is open, 1-4 switch tabs (RENDER / ECHO ESP / ECHO / WORLD)
     const tabIdx=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);
-    if(cheatOpen&&tabIdx>=0){
-      selectTab(TABS[tabIdx]);
-    }
+    if(cheatOpen&&tabIdx>=0)selectTab(TABS[tabIdx]);
     else if(e.code==='ShiftRight')toggleMenu();
     else if(e.code==='Digit1')togglePickaxe();
     else if(e.code==='Digit2')toggleTrident();
-    else if(e.code==='KeyC')setFreecam(!cheat.freecam.on);   // freecam rebound F → C
+    else if(e.code==='KeyC')setFreecam(!cheat.freecam.on);
     else if(e.code==='KeyM'){AU.muted=!AU.muted;AU.rainVol();toast(AU.muted?'Audio muted':'Audio on');}
-    else if(e.code==='BracketLeft'||e.code==='BracketRight'){
-      setSens(sensMult*(e.code==='BracketRight'?1.15:1/1.15));
-      syncMenuUI();
-      toast(`Look sensitivity ${Math.round(sensMult*100)}% — [ / ] to adjust`);
-    }
-    else if(e.code==='Escape'){
-      if(cheatOpen)closeMenu();
-      else if(paused){hidePause();attemptLock();}
-      else if(!locked())showPause();          // soft mode: Esc is our manual pause
-    }
+    else if(e.code==='BracketLeft'||e.code==='BracketRight'){setSens(sensMult*(e.code==='BracketRight'?1.15:1/1.15));syncMenuUI();toast(`Look sensitivity ${Math.round(sensMult*100)}% — [ / ] to adjust`);}
+    else if(e.code==='Escape'){if(cheatOpen)closeMenu();else if(paused){hidePause();attemptLock();}else if(!locked())showPause();}
     else if(e.code==='Space')doubleTapSpace();
   }
   keys[e.code]=true;
@@ -790,11 +746,8 @@ addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseL=mouseR=fal
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('mousedown',e=>{
   if(!started||cheatOpen||paused)return;
-  if(e.target!==canvas)return;                // ignore clicks that land on HUD/menus in soft mode
-  if(!locked()){
-    if(performance.now()-lastLockTry>2500)attemptLock();  // silent re-try at real capture
-    if(!softLock)return;                     // lock still pending → not a game click yet
-  }
+  if(e.target!==canvas)return;
+  if(!locked()){if(performance.now()-lastLockTry>2500)attemptLock();if(!softLock)return;}
   if(e.button===1){e.preventDefault();pickBlock();return;}
   if(e.button===0){mouseL=true;triggerSwing();}
   if(e.button===2){mouseR=true;placeTimer=0;}
@@ -804,73 +757,38 @@ addEventListener('mousemove',e=>{
   if(!started||cheatOpen||paused)return;
   if(!locked()&&!softLock)return;
   const dx=e.movementX||0,dy=e.movementY||0;
-  if(dx*dx+dy*dy>160000)return;               // guard against spurious movement spikes
-  if(cheat.freecam.on){
-    // freecam: full 360° — pitch is unclamped. Past vertical (|pitch|>90°)
-    // the camera is rolled over, so the yaw axis feels inverted unless we
-    // flip its sign while upside-down
-    fc.yaw-=dx*SENS*(Math.cos(fc.pitch)<0?-1:1);
-    fc.pitch-=dy*SENS;
-  }else{
-    // body camera: yaw unlimited, pitch full ±90° (straight down to your feet / straight up)
-    player.yaw-=dx*SENS;
-    player.pitch=clamp(player.pitch-dy*SENS,-PITCH_LIM,PITCH_LIM);
-  }
+  if(dx*dx+dy*dy>160000)return;
+  if(cheat.freecam.on){fc.yaw-=dx*SENS*(Math.cos(fc.pitch)<0?-1:1);fc.pitch-=dy*SENS;}
+  else{player.yaw-=dx*SENS;player.pitch=clamp(player.pitch-dy*SENS,-PITCH_LIM,PITCH_LIM);}
 });
 addEventListener('wheel',e=>{
   if(!started)return;
-  if(cheat.freecam.on){
-    cheat.freecam.speed=clamp(cheat.freecam.speed+(e.deltaY<0?2:-2),2,40);
-    syncMenuUI();return;
-  }
+  if(cheat.freecam.on){cheat.freecam.speed=clamp(cheat.freecam.speed+(e.deltaY<0?2:-2),2,40);syncMenuUI();return;}
   if(paused||cheatOpen||!(locked()||softLock))return;
-  hotbarSel=(hotbarSel+(hotbarSel+(e.deltaY>0?1:-1))>=0?0:0);   // (kept simple below)
   hotbarSel=(hotbarSel+(e.deltaY>0?1:-1)+hotbarSlots.length)%hotbarSlots.length;
   updateHotbar();sfx.ui();
 },{passive:true});
-addEventListener('resize',()=>{
-  renderer.setSize(innerWidth,innerHeight);
-  camera.aspect=handCam.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();handCam.updateProjectionMatrix();
-});
-
-/* pointer lock / pause / menu flow */
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=handCam.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();handCam.updateProjectionMatrix();});
 document.addEventListener('pointerlockchange',()=>{
-  if(locked()){
-    softLock=false;lockRetries=0;clearTimeout(lockTimer);
-    hidePause();
-  }else{
-    lastUnlockAt=performance.now();
-    if(started&&!cheatOpen&&!paused)showPause();  // genuine Esc-unlock → pause
-  }
+  if(locked()){softLock=false;lockRetries=0;clearTimeout(lockTimer);hidePause();}
+  else{lastUnlockAt=performance.now();if(started&&!cheatOpen&&!paused)showPause();}
   syncCursor();
 });
-document.addEventListener('pointerlockerror',onLockFail);  // Firefox failure path
+document.addEventListener('pointerlockerror',onLockFail);
  $('btnResume').addEventListener('click',e=>{e.target.blur();hidePause();attemptLock();});
 function toggleMenu(){cheatOpen?closeMenu():openMenu();}
-function openMenu(){
-  cheatOpen=true;$('cheatMenu').classList.remove('hidden');
-  document.exitPointerLock();
-  syncCursor();
-  toastOnce('welcome','ECHO attached — C toggles freecam anywhere','cheat');
-}
-function closeMenu(){
-  cheatOpen=false;$('cheatMenu').classList.add('hidden');
-  syncCursor();
-  if(started)attemptLock();
-}
+function openMenu(){cheatOpen=true;$('cheatMenu').classList.remove('hidden');document.exitPointerLock();syncCursor();toastOnce('welcome','ECHO attached — C toggles freecam anywhere','cheat');}
+function closeMenu(){cheatOpen=false;$('cheatMenu').classList.add('hidden');syncCursor();if(started)attemptLock();}
 
-/* ---------------- physics ---------------- */
+/* ---- physics ---- */
 const EYE=1.62,HW=0.3,PH=1.8;
-function solidAt(x,y,z){return getBlock(Math.floor(x),Math.floor(y),Math.floor(z))!==AIR;}
 function resolveAxis(axis){
   const p=player.pos,v=player.vel;
   const x0=Math.floor(p.x-HW),x1=Math.floor(p.x+HW);
   const y0=Math.floor(p.y),y1=Math.floor(p.y+PH-0.001);
   const z0=Math.floor(p.z-HW),z1=Math.floor(p.z+HW);
   let hit=false;
-  for(let x=x0;x<=x1&&!hit;x++)for(let y=y0;y<=y1&&!hit;y++)for(let z=z0;z<=z1&&!hit;z++)
-    if(getBlock(x,y,z)!==AIR)hit=true;
+  for(let x=x0;x<=x1&&!hit;x++)for(let y=y0;y<=y1&&!hit;y++)for(let z=z0;z<=z1&&!hit;z++)if(isSolid(getBlock(x,y,z)))hit=true;
   if(!hit)return false;
   const EPS=0.001;
   if(axis===0){if(v.x>0)p.x=Math.floor(p.x+HW)-HW-EPS;else if(v.x<0)p.x=Math.floor(p.x-HW)+1+HW+EPS;}
@@ -887,35 +805,53 @@ function moveCollide(dt){
 }
 const tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3();
 function getLookDir(out){return camera.getWorldDirection(out);}
-/* arrow keys turn the camera too (supplements mouse in fallback mode);
-   turn rate scales with the sensitivity setting so both stay in sync */
 function arrowLook(dt){
   const rx=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);
   const ry=(keys.ArrowUp?1:0)-(keys.ArrowDown?1:0);
   if(!rx&&!ry)return;
   const yawRate=2.6*sensMult,pitchRate=2.0*sensMult;
-  if(cheat.freecam.on){
-    fc.yaw-=rx*yawRate*dt*(Math.cos(fc.pitch)<0?-1:1);
-    fc.pitch+=ry*pitchRate*dt;                // unclamped — full 360°
-  }else{
-    player.yaw-=rx*yawRate*dt;
-    player.pitch=clamp(player.pitch+ry*pitchRate*dt,-PITCH_LIM,PITCH_LIM);
-  }
+  if(cheat.freecam.on){fc.yaw-=rx*yawRate*dt*(Math.cos(fc.pitch)<0?-1:1);fc.pitch+=ry*pitchRate*dt;}
+  else{player.yaw-=rx*yawRate*dt;player.pitch=clamp(player.pitch+ry*pitchRate*dt,-PITCH_LIM,PITCH_LIM);}
 }
 function physStep(dt){
+  if(ripWaterT>0)ripWaterT-=dt;                       // riptide plow window ticks down
+  if(player.pos.y<DEEP_Y)deepPending.add(ckey(Math.floor(player.pos.x)>>4,Math.floor(player.pos.z)>>4));
   if(cheat.freecam.on){fcMove(dt);return;}
   if(!cheatOpen)arrowLook(dt);
   const io=inputOn();
   let f=0,s=0;
   if(io){if(keys.KeyW)f+=1;if(keys.KeyS)f-=1;if(keys.KeyD)s+=1;if(keys.KeyA)s-=1;}
   const len=Math.hypot(f,s);let wx=0,wz=0;
-  if(len>0){f/=len;s/=len;
-    const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
-    wx=-sin*f+cos*s;wz=-cos*f-sin*s;}
+  if(len>0){f/=len;s/=len;const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);wx=-sin*f+cos*s;wz=-cos*f-sin*s;}
   const sprint=keys.ShiftLeft&&f>0;
+  const wbx=Math.floor(player.pos.x),wbz=Math.floor(player.pos.z);
+  const inWater=getBlock(wbx,Math.floor(player.pos.y+0.2),wbz)===WATER||getBlock(wbx,Math.floor(player.pos.y+0.95),wbz)===WATER;
+  playerInWater=inWater;
+  if(inWater&&!prevInWater){
+    const vy=player.vel.y;
+    if(vy<-5){spawnBurst(player.pos.x,player.pos.y+0.7,player.pos.z,0x9fc6ee,16,3.4);spawnBurst(player.pos.x,player.pos.y+0.7,player.pos.z,0xd9efff,8,2.2);sfx.splash(1);}
+    else if(vy<-1.2){spawnBurst(player.pos.x,player.pos.y+0.5,player.pos.z,0x9fc6ee,8,2.2);sfx.splash(0.55);}
+  }
+  prevInWater=inWater;
   if(gliding){
-    elytraStep(dt);
-    if(glideLaunchT>0)glideLaunchT-=dt;
+    if(inWater){endGlide(false);spawnBurst(player.pos.x,player.pos.y+0.8,player.pos.z,0x9fc6ee,14,3);sfx.splash(0.8);}
+    else{elytraStep(dt);if(glideLaunchT>0)glideLaunchT-=dt;}
+  }else if(inWater){
+    if(ripWaterT>0){
+      /* RIPTIDE PLOW (v1.7.3): right after a boost the water's sink-clamp
+         and heavy drag are suspended — the launch velocity carries in ANY
+         direction, including straight down a 1x1 shaft. Only mild drag so
+         chained boosts (hold RMB) keep you at ~full speed.            */
+      player.vel.multiplyScalar(Math.max(0,1-0.4*dt));
+    }else{
+      const k=Math.min(1,6*dt);
+      player.vel.x+=(wx*SWIM-player.vel.x)*k;
+      player.vel.z+=(wz*SWIM-player.vel.z)*k;
+      player.vel.y-=7*dt;
+      if(io&&keys.Space)player.vel.y=Math.min(player.vel.y+24*dt,3.6);
+      player.vel.y=Math.max(player.vel.y,-2.6);
+      player.vel.y*=Math.max(0,1-1.6*dt);
+    }
   }else{
     const spd=sprint?SPRINT:WALK,a=player.onGround?12:3.5,k=Math.min(1,a*dt);
     player.vel.x+=(wx*spd-player.vel.x)*k;
@@ -924,114 +860,76 @@ function physStep(dt){
     if(io&&keys.Space&&player.onGround)player.vel.y=JUMP_V;
   }
   const wasGround=player.onGround,fall=player.vel.y;
-  // SUBSTEPPED COLLISION: at riptide speeds a single 1/60s step can move
-  // nearly a full block — fast enough to jump clean THROUGH a 1-block
-  // wall without ever overlapping it. So whenever we're moving fast, the
-  // movement is split into slices of ≤0.4 blocks each. (Once an axis
-  // collides its velocity zeroes, so later slices simply stop that axis.)
   const speed=player.vel.length();
   const steps=Math.min(20,Math.max(1,Math.ceil(speed*dt/0.4)));
   const sdt=dt/steps;
   let hitAny=false,groundAny=false;
-  for(let i=0;i<steps;i++){
-    const col=moveCollide(sdt);
-    hitAny=hitAny||col.hit;
-    groundAny=groundAny||col.ground;
-  }
+  for(let i=0;i<steps;i++){const col=moveCollide(sdt);hitAny=hitAny||col.hit;groundAny=groundAny||col.ground;}
   player.onGround=groundAny;
-  // glide ends on ground/wall contact — except during the launch window,
-  // which exists so a ground-started glide can actually get airborne
   if(gliding&&glideLaunchT<=0&&(hitAny||groundAny))endGlide(true);
-  if(groundAny&&!wasGround&&!gliding&&fall<-13)sfx.thud();
+  if(inWater&&!gliding&&io&&keys.Space&&len>0&&ripWaterT<=0){
+    const ax=Math.floor(player.pos.x+wx*0.8),az=Math.floor(player.pos.z+wz*0.8);
+    if(isSolid(getBlock(ax,Math.floor(player.pos.y+0.3),az))||isSolid(getBlock(ax,Math.floor(player.pos.y+1.2),az)))player.vel.y=Math.max(player.vel.y,5.4);
+  }
+  if(groundAny&&!wasGround&&!gliding&&!inWater&&fall<-13)sfx.thud();
   sprinting=sprint;
+  checkSiteDiscovery();
 }
 let sprinting=false;
-/* elytra: velocity steers toward the look vector; gravity projected on the
-   flight path trades altitude for speed (dive = accelerate, pull up = climb).
-   During the ground-launch window gravity along the path is softened so
-   the hop's momentum survives the handover into full glide.            */
 function elytraStep(dt){
   const v=player.vel,look=getLookDir(tmpA);
   let sp=v.length();
   if(sp<0.01){v.copy(look);sp=6;}
   const cur=tmpB.copy(v).multiplyScalar(1/sp);
   cur.lerp(look,Math.min(1,3.5*dt)).normalize();
-  const launch=glideLaunchT>0?0.35:1;      // soft gravity while launching from the ground
-  sp+=-26*launch*cur.y*dt;                 // gravity along path
-  sp-=(0.08*sp+0.0038*sp*sp)*dt;           // drag
+  const launch=glideLaunchT>0?0.35:1;
+  sp+=-26*launch*cur.y*dt;
+  sp-=(0.08*sp+0.0038*sp*sp)*dt;
   sp=clamp(sp,0,46);
   v.copy(cur).multiplyScalar(sp);
-  if(glideLaunchT<=0)v.y-=2.6*dt;          // gentle sink in level flight (not during launch)
+  if(glideLaunchT<=0)v.y-=2.6*dt;
   if(v.y<-30)v.y=-30;
 }
 function startGlide(){
+  if(playerInWater){toastOnce('glideWet','Too wet to deploy the elytra');return;}
   gliding=true;equipT=0;
   if(player.onGround){
-    // ground launch: committed hop straight into the glide, with a brief
-    // window where ground contact won't immediately cancel the flight
     glideLaunchT=GLIDE_LAUNCH;
     player.vel.y=Math.max(player.vel.y,JUMP_V*0.8);
     const h=Math.hypot(player.vel.x,player.vel.z);
-    if(h<3){                               // standing still → push off along the look direction
-      const look=getLookDir(tmpA);
-      player.vel.x=look.x*4;
-      player.vel.z=look.z*4;
-    }
+    if(h<3){const look=getLookDir(tmpA);player.vel.x=look.x*4;player.vel.z=look.z*4;}
   }else{
     glideLaunchT=0;
     if(player.vel.length()>0.5)player.vel.multiplyScalar(0.55);
-    if(player.vel.lengthSq()>1e-6){
-      if(player.vel.length()<4)player.vel.setLength(4);
-    }else{
-      const look=getLookDir(tmpA);
-      player.vel.set(look.x*4,Math.max(look.y*4,1),look.z*4);
-    }
+    if(player.vel.lengthSq()>1e-6){if(player.vel.length()<4)player.vel.setLength(4);}
+    else{const look=getLookDir(tmpA);player.vel.set(look.x*4,Math.max(look.y*4,1),look.z*4);}
     player.vel.y=Math.max(player.vel.y,0.5);
   }
   toast('Elytra deployed — RMB fires the rocket','good');
   sfx.glide();
 }
-function endGlide(impact){
-  if(!gliding)return;
-  gliding=false;glideLaunchT=0;equipT=0;
-  toast(impact?'Glide ended — impact':'Elytra stowed');
-}
-/* double-tap SPACE toggles the elytra — from the ground, mid-air, anywhere */
+function endGlide(impact){if(!gliding)return;gliding=false;glideLaunchT=0;equipT=0;toast(impact?'Glide ended — impact':'Elytra stowed');}
 function doubleTapSpace(){
   const t=performance.now();
-  if(t-lastSpaceTap<280){
-    lastSpaceTap=0;
-    if(gliding)endGlide(false);
-    else startGlide();
-  }else lastSpaceTap=t;
+  if(t-lastSpaceTap<280){lastSpaceTap=0;if(gliding)endGlide(false);else startGlide();}
+  else lastSpaceTap=t;
 }
-/* ---------------- riptide trident ----------------
-   Straight boost along the look vector — elytra-boost feel, no camera
-   spin, no glide. Afterwards normal physics apply (gravity, air drag).
-   Needs rain unless the Echo Trident "No Rain" module is toggled on,
-   and the BOOST slider stacks extra speed on top of the vanilla launch. */
-function toggleTrident(){
-  tridentOn=!tridentOn;equipT=0;
-  if(tridentOn)pickaxeOn=false;            // pickaxe and trident are mutually exclusive
-  toast(tridentOn?'Trident equipped — RMB riptides while it rains':'Trident stowed');
-  sfx.ui();
-}
+function toggleTrident(){tridentOn=!tridentOn;equipT=0;if(tridentOn)pickaxeOn=false;toast(tridentOn?'Trident equipped — RMB riptides in rain or water':'Trident stowed');sfx.ui();}
 function tryRiptide(){
   if(!tridentOn)return false;
   if(riptideCD>0)return false;
-  if(!cheat.trident.noRain&&!weather.on){
-    toastOnce('ripDry','Riptide needs rain — storms roll in on a timer (ECHO → No Rain overrides)');
-    return false;
-  }
+  if(!cheat.trident.noRain&&!weather.on&&!playerInWater){toastOnce('ripDry','Riptide needs rain or open water (ECHO → No Rain overrides)');return false;}
   const look=getLookDir(tmpA);
-  const v=RIPTIDE_V*(1+cheat.trident.boost);   // vanilla launch + Echo boost
-  player.vel.multiplyScalar(0.35);             // shed some old momentum, keep the rest
-  player.vel.addScaledVector(look,v);          // clean forward boost along the look vector
-  if(player.onGround)player.vel.y=Math.max(player.vel.y,4.6);
+  const v=RIPTIDE_V*(1+cheat.trident.boost);
+  player.vel.multiplyScalar(0.35);
+  player.vel.addScaledVector(look,v);
+  // ground pop-up only when NOT aiming steeply down — looking down while
+  // standing must not launch you upward (v1.7.3 fix)
+  if(player.onGround&&look.y>-0.3)player.vel.y=Math.max(player.vel.y,4.6);
+  ripWaterT=RIP_PLOW;      // plow through water at full boost speed, any direction
   riptideCD=RIPTIDE_CD;
   fovKick=Math.min(fovKick+10+v*0.08,20);
-  boostShake=0.22;
-  ripTrail=0.4;
+  boostShake=0.22;ripTrail=0.4;
   triggerSwing();
   const p=player.pos;
   spawnBurst(p.x,p.y+1.2,p.z,0x59d7ff,12,3.4);
@@ -1040,18 +938,11 @@ function tryRiptide(){
   return true;
 }
 function updateRiptide(dt){if(riptideCD>0)riptideCD-=dt;}
-/* freecam */
 const fc={pos:new THREE.Vector3(),yaw:0,pitch:0};
 function fcMove(dt){
   const spd=cheat.freecam.speed;let f=0,s=0,u=0;
-  if(inputOn()){
-    if(keys.KeyW)f+=1;if(keys.KeyS)f-=1;
-    if(keys.KeyD)s+=1;if(keys.KeyA)s-=1;
-    if(keys.Space)u+=1;if(keys.ShiftLeft)u-=1;
-  }
+  if(inputOn()){if(keys.KeyW)f+=1;if(keys.KeyS)f-=1;if(keys.KeyD)s+=1;if(keys.KeyA)s-=1;if(keys.Space)u+=1;if(keys.ShiftLeft)u-=1;}
   if(!f&&!s&&!u)return;
-  // W flies along the FULL view direction (spectator-style), so you can
-  // dive/climb with the mouse now that freecam pitch is unclamped
   const cp=Math.cos(fc.pitch);
   const fx=-cp*Math.sin(fc.yaw),fy=Math.sin(fc.pitch),fz=-cp*Math.cos(fc.yaw);
   const rx=Math.cos(fc.yaw),rz=-Math.sin(fc.yaw);
@@ -1059,8 +950,6 @@ function fcMove(dt){
   fc.pos.y+=(fy*f+u)*spd*dt;
   fc.pos.z+=(fz*f+rz*s)*spd*dt;
 }
-
-/* ---------------- raycast (Amanatides & Woo DDA) ---------------- */
 function raycastVoxel(o,d,maxD){
   let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);
   const sx=d.x>0?1:-1,sy=d.y>0?1:-1,sz=d.z>0?1:-1;
@@ -1076,26 +965,22 @@ function raycastVoxel(o,d,maxD){
     else if(ty<tz){if(ty>maxD)break;y+=sy;ny=-sy;nx=nz=0;ty+=dty;}
     else{if(tz>maxD)break;z+=sz;nz=-sz;nx=ny=0;tz+=dtz;}
     const b=getBlock(x,y,z);
-    if(b!==AIR)return{x,y,z,nx,ny,nz,block:b};
+    if(isSolid(b))return{x,y,z,nx,ny,nz,block:b};
   }
   return null;
 }
 
-/* ---------------- mining / placing / inventory ---------------- */
-const hotbarSlots=[GRASS,DIRT,STONE,DEEPSLATE,LOG,LEAVES];
+/* ---- mining / placing ---- */
+const hotbarSlots=[GRASS,DIRT,STONE,DEEPSLATE,LOG,LEAVES,SAND,CHEST,PLANKS,HOPPER];
 let hotbarSel=0;const inv={};
 let mineKey=null,mineProg=0,digSndT=0,placeTimer=0;
 const breakTime=b=>pickaxeOn?BLOCK_DEF[b].pick:BLOCK_DEF[b].hand;
-function togglePickaxe(){
-  pickaxeOn=!pickaxeOn;equipT=0;
-  if(pickaxeOn)tridentOn=false;            // pickaxe and trident are mutually exclusive
-  toast(pickaxeOn?'Pickaxe equipped':'Pickaxe stowed');
-  sfx.ui();
-}
+function togglePickaxe(){pickaxeOn=!pickaxeOn;equipT=0;if(pickaxeOn)tridentOn=false;toast(pickaxeOn?'Pickaxe equipped':'Pickaxe stowed');sfx.ui();}
 function breakBlock(hit){
   const b=getBlock(hit.x,hit.y,hit.z);
-  setBlock(hit.x,hit.y,hit.z,AIR);
   inv[b]=(inv[b]||0)+1;updateHotbar();
+  const floods=getBlock(hit.x+1,hit.y,hit.z)===WATER||getBlock(hit.x-1,hit.y,hit.z)===WATER||getBlock(hit.x,hit.y,hit.z+1)===WATER||getBlock(hit.x,hit.y,hit.z-1)===WATER||getBlock(hit.x,hit.y+1,hit.z)===WATER;
+  setBlock(hit.x,hit.y,hit.z,floods?WATER:AIR);
   spawnBurst(hit.x+0.5,hit.y+0.5,hit.z+0.5,BLOCK_DEF[b].color,14,3.2);
   sfx.brk();
 }
@@ -1110,7 +995,7 @@ function tryPlace(){
   if((inv[b]||0)<=0){toastOnce('nb','Out of '+BLOCK_DEF[b].name+' — mine some first');return;}
   const px=hit.x+hit.nx,py=hit.y+hit.ny,pz=hit.z+hit.nz;
   if(py<Y_MIN||py>Y_MAX)return;
-  if(getBlock(px,py,pz)!==AIR||intersectsPlayer(px,py,pz))return;
+  if(isSolid(getBlock(px,py,pz))||intersectsPlayer(px,py,pz))return;
   setBlock(px,py,pz,b);
   inv[b]--;updateHotbar();sfx.place();triggerSwing();
 }
@@ -1130,16 +1015,11 @@ function pickBlock(){
   const i=hotbarSlots.indexOf(hit.block);
   if(i>=0){hotbarSel=i;updateHotbar();}
 }
-
-/* block highlight + crack overlay */
-const hlBox=new THREE.LineSegments(
-  new THREE.EdgesGeometry(new THREE.BoxGeometry(1.002,1.002,1.002)),
-  new THREE.LineBasicMaterial({color:0x101010,transparent:true,opacity:0.65}));
+const hlBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.002,1.002,1.002)),new THREE.LineBasicMaterial({color:0x101010,transparent:true,opacity:0.65}));
 hlBox.visible=false;scene.add(hlBox);
 const crackMat=new THREE.MeshBasicMaterial({map:crackTexs[0],transparent:true,depthWrite:false});
 const crackBox=new THREE.Mesh(new THREE.BoxGeometry(1.004,1.004,1.004),crackMat);
 crackBox.visible=false;scene.add(crackBox);
-
 function updateMining(dt){
   const can=inputOn()&&!cheat.freecam.on;
   let hit=null;
@@ -1159,13 +1039,8 @@ function updateMining(dt){
       }
     }else{mineKey=null;mineProg=0;}
   }else{hlBox.visible=false;mineKey=null;mineProg=0;}
-  if(mineProg>0&&mineKey){
-    crackBox.visible=true;
-    crackBox.position.copy(hlBox.position);
-    crackMat.map=crackTexs[Math.min(4,Math.floor(mineProg*5))];
-  }else crackBox.visible=false;
-  // held right mouse: firework while gliding > riptide with trident > place.
-  // the trident retry polls fast so it fires the instant its cooldown ends
+  if(mineProg>0&&mineKey){crackBox.visible=true;crackBox.position.copy(hlBox.position);crackMat.map=crackTexs[Math.min(4,Math.floor(mineProg*5))];}
+  else crackBox.visible=false;
   if(mouseR&&inputOn()&&!cheat.freecam.on){
     placeTimer-=dt;
     if(placeTimer<=0){
@@ -1176,19 +1051,20 @@ function updateMining(dt){
   }else if(!mouseR)placeTimer=0;
 }
 
-/* ---------------- particles ---------------- */
+/* ---- particles ---- */
 const PN=140;
 const pMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(0.09,0.09,0.09),new THREE.MeshBasicMaterial(),PN);
 pMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);scene.add(pMesh);
 const parts=[];const tmpM=new THREE.Matrix4(),tmpC=new THREE.Color();
-for(let i=0;i<PN;i++){parts.push({life:0,max:1,size:1,pos:new THREE.Vector3(),vel:new THREE.Vector3()});pMesh.setColorAt(i,tmpC.setHex(0));}
+for(let i=0;i<PN;i++){parts.push({life:0,max:1,size:1,grav:-20,pos:new THREE.Vector3(),vel:new THREE.Vector3()});pMesh.setColorAt(i,tmpC.setHex(0));}
 let pIdx=0;
-function spawnBurst(x,y,z,color,count,speed){
+function spawnBurst(x,y,z,color,count,speed,grav){
   for(let n=0;n<count;n++){
     const i=pIdx=(pIdx+1)%PN,p=parts[i];
     p.pos.set(x,y,z);
     p.vel.set(Math.random()-0.5,Math.random()-0.35,Math.random()-0.5).normalize().multiplyScalar(speed*(0.4+Math.random()*0.7));
     p.life=p.max=0.35+Math.random()*0.45;p.size=0.6+Math.random()*0.9;
+    p.grav=grav===undefined?-20:grav;
     pMesh.setColorAt(i,tmpC.setHex(color).offsetHSL(0,0,(Math.random()-0.5)*0.12));
   }
   if(pMesh.instanceColor)pMesh.instanceColor.needsUpdate=true;
@@ -1197,11 +1073,9 @@ function updateParticles(dt){
   for(let i=0;i<PN;i++){
     const p=parts[i];
     if(p.life>0){
-      p.life-=dt;p.vel.y-=20*dt;
+      p.life-=dt;p.vel.y+=p.grav*dt;
       p.pos.addScaledVector(p.vel,dt);
-      if(getBlock(Math.floor(p.pos.x),Math.floor(p.pos.y),Math.floor(p.pos.z))!==AIR){
-        p.vel.y*=-0.35;p.vel.x*=0.5;p.vel.z*=0.5;p.pos.y+=0.06;
-      }
+      if(isSolid(getBlock(Math.floor(p.pos.x),Math.floor(p.pos.y),Math.floor(p.pos.z)))){p.vel.y*=-0.35;p.vel.x*=0.5;p.vel.z*=0.5;p.pos.y+=0.06;}
       const s=p.size*clamp(p.life/p.max*3,0,1);
       tmpM.makeScale(s,s,s).setPosition(p.pos);
     }else tmpM.makeScale(0,0,0).setPosition(0,-999,0);
@@ -1211,20 +1085,15 @@ function updateParticles(dt){
 }
 let boostTrail=0;
 
-/* ---------------- clouds ---------------- */
+/* ---- clouds ---- */
 const cloudMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.5,depthWrite:false,fog:false,side:THREE.DoubleSide});
 const clouds=[];
-{
-  const R=mulberry32(SEED^0xC10D);
+{const R=mulberry32(SEED^0xC10D);
   for(let i=0;i<14;i++){
     const g=new THREE.Group();
     const n=2+(R()*2|0);
-    for(let j=0;j<n;j++){
-      const m=new THREE.Mesh(new THREE.PlaneGeometry(10+R()*18,6+R()*10),cloudMat);
-      m.rotation.x=-Math.PI/2;m.position.set((R()-0.5)*22,0,(R()-0.5)*14);
-      g.add(m);
-    }
-    g.position.set((R()-0.5)*300,85+R()*5,(R()-0.5)*300);   // above the new y60 surface
+    for(let j=0;j<n;j++){const m=new THREE.Mesh(new THREE.PlaneGeometry(10+R()*18,6+R()*10),cloudMat);m.rotation.x=-Math.PI/2;m.position.set((R()-0.5)*22,0,(R()-0.5)*14);g.add(m);}
+    g.position.set((R()-0.5)*300,85+R()*5,(R()-0.5)*300);
     scene.add(g);clouds.push(g);
   }
 }
@@ -1238,79 +1107,50 @@ function updateClouds(dt){
   }
 }
 
-/* ---------------- timed weather cycle + rain ----------------
-   weather.on is driven purely by the clock: RAIN_PERIOD seconds clear,
-   RAIN_PERIOD seconds rain, repeating. The cycle starts CLEAR when you
-   enter the world and freezes while paused/disconnected.              */
+/* ---- weather ---- */
 const weather={on:false};
 let weatherTimer=0;
 function updateWeatherCycle(dt){
   weatherTimer+=dt;
-  if(weatherTimer>=RAIN_PERIOD){
-    weatherTimer-=RAIN_PERIOD;
-    setWeather(!weather.on);
-  }
+  if(weatherTimer>=RAIN_PERIOD){weatherTimer-=RAIN_PERIOD;setWeather(!weather.on);}
 }
 function setWeather(on){
   if(on===weather.on)return;
   weather.on=on;
   rainMesh.visible=on&&started;
-  if(on){
-    applyRainDensity();
-    for(const d of rainDrops)respawnDrop(d);  // fresh field of drops around the player
-    nextThunder=performance.now()/1000+8+Math.random()*22;
-  }
+  if(on){applyRainDensity();for(const d of rainDrops)respawnDrop(d);nextThunder=performance.now()/1000+8+Math.random()*22;}
   AU.rainSet(on);
   toast(on?'Rain rolling in — riptide is live':'Skies clearing');
 }
-const rainMesh=new THREE.InstancedMesh(
-  new THREE.BoxGeometry(1,1,1),
-  new THREE.MeshBasicMaterial({transparent:true,opacity:0.34,depthWrite:false,fog:false}),
-  RAIN_N);
+const rainMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial({transparent:true,opacity:0.34,depthWrite:false,fog:false}),RAIN_N);
 rainMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 rainMesh.frustumCulled=false;
-rainMesh.visible=false;                     // clear skies on boot
-scene.add(rainMesh);
+rainMesh.visible=false;scene.add(rainMesh);
 const rainDrops=[];
 const _rv=new THREE.Vector3(),_rs=new THREE.Vector3(),_re=new THREE.Euler();
-{
-  const R=mulberry32(SEED^0xAA17);
+{const R=mulberry32(SEED^0xAA17);
   for(let i=0;i<RAIN_N;i++){
-    const spd=22+R()*10;                    // fall speed — sets streak length feel
-    const wx=1.4+R()*0.6, wz=(R()-0.5)*1.2; // wind
+    const spd=22+R()*10;const wx=1.4+R()*0.6,wz=(R()-0.5)*1.2;
     const d={x:0,y:-999,z:0,spd,wx,wz,len:0.45+R()*0.3,w:0.014+R()*0.014,fell:0,q:new THREE.Quaternion()};
-    _re.set(Math.atan2(d.wz,spd),0,-Math.atan2(d.wx,spd));   // tilt streak along its velocity
-    d.q.setFromEuler(_re);
+    _re.set(Math.atan2(d.wz,spd),0,-Math.atan2(d.wx,spd));d.q.setFromEuler(_re);
     rainDrops.push(d);
     rainMesh.setColorAt(i,tmpC.setHex(0xaecbec).offsetHSL(0,0,(R()-0.5)*0.18));
   }
   if(rainMesh.instanceColor)rainMesh.instanceColor.needsUpdate=true;
 }
-function respawnDrop(d){
-  d.x=player.pos.x+(Math.random()*2-1)*RAIN_R;
-  d.z=player.pos.z+(Math.random()*2-1)*RAIN_R;
-  d.y=player.pos.y+10+Math.random()*9;
-  d.fell=0;
-}
-function applyRainDensity(){
-  rainMesh.count=Math.max(1,Math.floor(RAIN_N*0.7));   // fixed density — no module controls weather now
-}
+function respawnDrop(d){d.x=player.pos.x+(Math.random()*2-1)*RAIN_R;d.z=player.pos.z+(Math.random()*2-1)*RAIN_R;d.y=player.pos.y+10+Math.random()*9;d.fell=0;}
+function applyRainDensity(){rainMesh.count=Math.max(1,Math.floor(RAIN_N*0.7));}
 function updateRain(dt){
   if(!weather.on)return;
   const n=rainMesh.count;
   for(let i=0;i<n;i++){
     const d=rainDrops[i];
     d.y-=d.spd*dt;d.x+=d.wx*dt;d.z+=d.wz*dt;d.fell+=d.spd*dt;
-    // wrap horizontally around the player so the storm follows you
     if(d.x-player.pos.x>RAIN_R)d.x-=RAIN_R*2;else if(d.x-player.pos.x<-RAIN_R)d.x+=RAIN_R*2;
     if(d.z-player.pos.z>RAIN_R)d.z-=RAIN_R*2;else if(d.z-player.pos.z<-RAIN_R)d.z+=RAIN_R*2;
     const hit=getBlock(Math.floor(d.x),Math.floor(d.y),Math.floor(d.z))!==AIR;
     if(hit||d.y<player.pos.y-45){
-      // splash only if the drop actually fell through open air — drops
-      // spawned inside rock (player underground) die silently, so dig
-      // sites stay dry with zero particle spam
-      if(hit&&d.fell>3&&Math.random()<0.22)
-        spawnBurst(d.x,d.y+0.05,d.z,0xbcd8ee,2,0.9);
+      if(hit&&d.fell>3&&Math.random()<0.22)spawnBurst(d.x,d.y+0.05,d.z,0xbcd8ee,2,0.9);
       respawnDrop(d);
     }
     tmpM.compose(_rv.set(d.x,d.y,d.z),d.q,_rs.set(d.w,d.len,d.w));
@@ -1318,21 +1158,18 @@ function updateRain(dt){
   }
   rainMesh.instanceMatrix.needsUpdate=true;
 }
-/* sky / fog / cloud blend between clear and storm, plus thunder flashes */
 const SKY_CLEAR=new THREE.Color(SKY),SKY_RAIN=new THREE.Color(0x5a6a7e),SKY_FLASH=new THREE.Color(0xdde6f2);
+const SKY_WATER=new THREE.Color(0x1c4d8f);
 const CLOUD_CLEAR=new THREE.Color(0xffffff),CLOUD_RAIN=new THREE.Color(0x99a3b4);
 const _sky=new THREE.Color(SKY),_cloud=new THREE.Color(0xffffff);
 let rainLerp=0,flashT=0,nextThunder=Infinity;
-function updateWeatherFX(dt,t){
+function updateWeatherFX(dt,t,underwater){
   rainLerp+=((weather.on?1:0)-rainLerp)*Math.min(1,dt*1.5);
+  if(underwater){_sky.copy(SKY_WATER).lerp(SKY_RAIN,rainLerp*0.2);renderer.setClearColor(_sky);scene.fog.color.copy(_sky);scene.fog.near=1;scene.fog.far=17;return;}
   if(flashT>0)flashT-=dt;
-  if(weather.on&&t>nextThunder){
-    nextThunder=t+24+Math.random()*46;
-    flashT=0.3;
-    sfx.thunder();
-  }
+  if(weather.on&&t>nextThunder){nextThunder=t+24+Math.random()*46;flashT=0.3;sfx.thunder();}
   _sky.copy(SKY_CLEAR).lerp(SKY_RAIN,rainLerp);
-  if(flashT>0)_sky.lerp(SKY_FLASH,(flashT/0.3)*0.65);   // lightning brightens the sky briefly
+  if(flashT>0)_sky.lerp(SKY_FLASH,(flashT/0.3)*0.65);
   renderer.setClearColor(_sky);
   scene.fog.color.copy(_sky);
   scene.fog.near=lerp(FOG_NEAR,24,rainLerp);
@@ -1342,27 +1179,22 @@ function updateWeatherFX(dt,t){
   cloudMat.opacity=lerp(0.5,0.8,rainLerp);
 }
 
-/* ---------------- Chunkfinder ESP (real + ghost markers) ----------------
-   Draws markers for real sites AND ghost sites identically — you can't
-   tell them apart without digging. ~50% of what you see is nothing.  */
+/* ---- ESP ---- */
 const espGroup=new THREE.Group();espGroup.visible=false;scene.add(espGroup);
 const espMat=new THREE.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:0.16,depthTest:false,side:THREE.DoubleSide,fog:false});
 const espLineMat=new THREE.LineBasicMaterial({color:0xff4545,transparent:true,opacity:0.8,depthTest:false,fog:false});
 function refreshESP(){
-  while(espGroup.children.length){
-    const m=espGroup.children.pop();m.geometry.dispose();
-  }
+  while(espGroup.children.length){const m=espGroup.children.pop();m.geometry.dispose();}
   if(!cheat.esp.on)return;
   const R=cheat.esp.range;
   const pcx=Math.floor(player.pos.x)>>4,pcz=Math.floor(player.pos.z)>>4;
-  // iterate the super-cells that cover the chunk range
   const i0=cellOf(pcx-R),i1=cellOf(pcx+R),j0=cellOf(pcz-R),j1=cellOf(pcz+R);
   for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){
     for(const s of [siteForCell(i,j),ghostForCell(i,j)]){
       if(!s)continue;
       const w=s.x1-s.x0+1,d=s.z1-s.z0+1;
       const cxw=s.x0+w/2,czw=s.z0+d/2;
-      const y=heightAt(Math.floor(cxw),Math.floor(czw))+1.35;
+      const y=Math.max(heightAt(Math.floor(cxw),Math.floor(czw)),SEA_LEVEL)+1.35;
       const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),espMat);
       plane.rotation.x=-Math.PI/2;plane.position.set(cxw,y,czw);plane.renderOrder=990;
       const pts=[new THREE.Vector3(-w/2,0,-d/2),new THREE.Vector3(w/2,0,-d/2),new THREE.Vector3(w/2,0,d/2),new THREE.Vector3(-w/2,0,d/2)];
@@ -1378,15 +1210,11 @@ function updateESP(t){
   espLineMat.opacity=0.5+0.4*p;
 }
 
-/* ---------------- ECHO client state (tabbed) ----------------
-   tabs: RENDER (reserved) · ECHO ESP (chunkfinder) · ECHO (freecam,
-   echo trident = boost + no-rain, sensitivity) · WORLD (reserved).
-   Select with clicks or 1-4 while the menu is open. A red dot marks
-   tabs with an active module. NO location intel of any kind.            */
+/* ---- ECHO client ---- */
 const cheat={
   freecam:{on:false,speed:14},
   esp:{on:false,range:12},
-  trident:{boost:0,noRain:false},           // Echo Trident module
+  trident:{boost:0,noRain:false},
 };
 const TABS=['render','espesp','echo','world'];
 let curTab='echo';
@@ -1408,11 +1236,8 @@ function setFreecam(on){
 function setEsp(on){
   if(on===cheat.esp.on)return;
   cheat.esp.on=on;espGroup.visible=on;refreshESP();
-  let msg=on?'Chunkfinder enabled':'Chunkfinder disabled';
-  if(on){
-    const n=espGroup.children.length/2;     // real + ghost markers — indistinguishable
-    msg+=` — ${n} marker${n===1?'':'s'} in range · accuracy not guaranteed`;
-  }
+  let msg=on?'Basefinder enabled':'Basefinder disabled';
+  if(on){const n=espGroup.children.length/2;msg+=` — ${n} marker${n===1?'':'s'} in range · accuracy not guaranteed`;}
   toast(msg,'cheat');
   sfx.toggle();syncMenuUI();updateWatermark();
 }
@@ -1424,7 +1249,7 @@ function syncMenuUI(){
   $('rgEsp').value=cheat.esp.range;$('espVal').textContent=cheat.esp.range;
   $('rgTriBoost').value=Math.round(cheat.trident.boost*100);$('triBoostVal').textContent='+'+Math.round(cheat.trident.boost*100)+'%';
   $('rgSens').value=Math.round(sensMult*100);$('sensVal').textContent=Math.round(sensMult*100)+'%';
-  // red dot on tabs that host an active module
+  $('acStat').textContent=deepUnlocked.size+' synced';
   document.querySelector('.cm-tab[data-tab="espesp"] .cm-dot').classList.toggle('on',cheat.esp.on);
   document.querySelector('.cm-tab[data-tab="echo"] .cm-dot').classList.toggle('on',cheat.freecam.on);
 }
@@ -1432,24 +1257,17 @@ function syncMenuUI(){
  $('swEsp').addEventListener('change',e=>setEsp(e.target.checked));
  $('rgFcSpeed').addEventListener('input',e=>{cheat.freecam.speed=+e.target.value;$('fcSpeedVal').textContent=e.target.value;});
  $('rgEsp').addEventListener('input',e=>{cheat.esp.range=+e.target.value;$('espVal').textContent=e.target.value;refreshESP();});
- $('rgTriBoost').addEventListener('input',e=>{
-  cheat.trident.boost=+e.target.value/100;
-  $('triBoostVal').textContent='+'+e.target.value+'%';
-});
- $('swNoRain').addEventListener('change',e=>{
-  cheat.trident.noRain=e.target.checked;
-  toast(e.target.checked?'No Rain enabled — trident works in any weather':'No Rain off — trident needs rain','cheat');
-  sfx.toggle();
-});
+ $('rgTriBoost').addEventListener('input',e=>{cheat.trident.boost=+e.target.value/100;$('triBoostVal').textContent='+'+e.target.value+'%';});
+ $('swNoRain').addEventListener('change',e=>{cheat.trident.noRain=e.target.checked;toast(e.target.checked?'No Rain enabled — trident works anywhere':'No Rain off — trident needs rain or water','cheat');sfx.toggle();});
  $('rgSens').addEventListener('input',e=>{setSens(+e.target.value/100);$('sensVal').textContent=Math.round(sensMult*100)+'%';});
 function updateWatermark(){
-  const act=[cheat.freecam.on?'freecam':null,cheat.esp.on?'chunkfinder':null].filter(Boolean);
+  const act=[cheat.freecam.on?'freecam':null,cheat.esp.on?'basefinder':null].filter(Boolean);
   const wm=$('wm');
   if(act.length){wm.classList.remove('hidden');wm.textContent='ECHO · '+act.join(', ');}
   else wm.classList.add('hidden');
 }
 
-/* ---------------- first-person hand / held items / legs ---------------- */
+/* ---- hand model ---- */
 const handScene=new THREE.Scene();
 const handCam=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,0.01,5);
 handScene.add(new THREE.HemisphereLight(0xffffff,0x404850,1.05));
@@ -1459,20 +1277,15 @@ const lam=c=>new THREE.MeshLambertMaterial({color:c});
 const arm=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.7),lam(0xc98f6b));
 arm.position.set(0.1,-0.3,0.32);arm.rotation.x=-0.95;held.add(arm);
 const pickG=new THREE.Group();
-{
-  const handle=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.72,0.07),lam(0x8a6a3f));
-  pickG.add(handle);
+{const handle=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.72,0.07),lam(0x8a6a3f));pickG.add(handle);
   const bar=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.09,0.09),lam(0xb9bec6));bar.position.y=0.34;pickG.add(bar);
   const tipL=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.07,0.07),lam(0x8d939c));tipL.position.set(-0.30,0.30,0);tipL.rotation.z=0.5;pickG.add(tipL);
   const tipR=tipL.clone();tipR.material=lam(0x8d939c);tipR.position.x=0.30;tipR.rotation.z=-0.5;pickG.add(tipR);
   const cap=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.15,0.13),lam(0xa6abb3));cap.position.y=0.39;pickG.add(cap);
   pickG.rotation.set(-0.25,0,0.55);pickG.position.set(0,0.06,0);
-  held.add(pickG);
-}
-/* riptide trident — teal shaft, three-pronged head */
+  held.add(pickG);}
 const triG=new THREE.Group();
-{
-  const teal=lam(0x2e6f66),light=lam(0x74d6c9),dark=lam(0x1e4f49);
+{const teal=lam(0x2e6f66),light=lam(0x74d6c9),dark=lam(0x1e4f49);
   const shaft=new THREE.Mesh(new THREE.BoxGeometry(0.05,1.0,0.05),teal);triG.add(shaft);
   const mid=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.22,0.06),light);mid.position.y=0.56;triG.add(mid);
   const cross=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.055,0.055),light);cross.position.y=0.5;triG.add(cross);
@@ -1480,23 +1293,16 @@ const triG=new THREE.Group();
   const pL=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.2,0.05),light);pL.position.set(-0.15,0.6,0);pL.rotation.z=0.45;triG.add(pL);
   const pR=pL.clone();pR.material=light;pR.position.x=0.15;pR.rotation.z=-0.45;triG.add(pR);
   const wrap=new THREE.Mesh(new THREE.BoxGeometry(0.065,0.1,0.065),dark);wrap.position.y=-0.15;triG.add(wrap);
-  triG.rotation.set(-0.2,0,0.45);triG.position.set(0,0.02,0);
-  triG.scale.setScalar(0.92);
-  held.add(triG);
-}
+  triG.rotation.set(-0.2,0,0.45);triG.position.set(0,0.02,0);triG.scale.setScalar(0.92);
+  held.add(triG);}
 const fwG=new THREE.Group();
-{
-  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.3,10),lam(0xd9d2c2));fwG.add(body);
+{const body=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.3,10),lam(0xd9d2c2));fwG.add(body);
   const nose=new THREE.Mesh(new THREE.ConeGeometry(0.055,0.11,10),lam(0xe04343));nose.position.y=0.2;fwG.add(nose);
   const band=new THREE.Mesh(new THREE.CylinderGeometry(0.053,0.053,0.035,10),lam(0xf0c24e));band.position.y=0.06;fwG.add(band);
   const tail=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.14,0.03),lam(0x7c6a4e));tail.position.y=-0.2;fwG.add(tail);
-  fwG.rotation.set(-0.35,0,0);held.add(fwG);
-}
-/* legs + feet — slide up into view when you pitch the camera down,
-   so looking straight down actually shows your feet */
+  fwG.rotation.set(-0.35,0,0);held.add(fwG);}
 const legsG=new THREE.Group();handScene.add(legsG);
-{
-  const jean=lam(0x3d4c6e),shoe=lam(0x57432f);
+{const jean=lam(0x3d4c6e),shoe=lam(0x57432f);
   for(const sx of[-1,1]){
     const foot=new THREE.Mesh(new THREE.BoxGeometry(0.17,0.11,0.29),shoe);
     foot.position.set(0.125*sx,-0.16,-0.55);foot.rotation.y=0.12*sx;
@@ -1504,8 +1310,7 @@ const legsG=new THREE.Group();handScene.add(legsG);
     leg.position.set(0.125*sx,-0.31,-0.42);leg.rotation.x=-0.73;
     legsG.add(foot,leg);
   }
-  legsG.visible=false;
-}
+  legsG.visible=false;}
 let equipT=1,swingT=10,bobPhase=0,glideLerp=0,boostShake=0,fovKick=0;
 function triggerSwing(){swingT=0;}
 function updateHand(dt){
@@ -1518,21 +1323,16 @@ function updateHand(dt){
   glideLerp+=((gliding?1:0)-glideLerp)*Math.min(1,dt*6);
   held.position.set(0.5+bobX,-0.44+bobY-(1-equipT)*0.55+glideLerp*0.06,-0.75);
   held.rotation.set(-0.18-swing*1.25+glideLerp*0.55,-0.42+swing*0.5,0.22-swing*0.35);
-  if(boostShake>0){
-    boostShake-=dt;
-    held.position.x+=(Math.random()-0.5)*0.03*boostShake*10;
-    held.position.y+=(Math.random()-0.5)*0.03*boostShake*10;
-  }
+  if(boostShake>0){boostShake-=dt;held.position.x+=(Math.random()-0.5)*0.03*boostShake*10;held.position.y+=(Math.random()-0.5)*0.03*boostShake*10;}
   pickG.visible=pickaxeOn&&!gliding;
   triG.visible=tridentOn&&!gliding;
   fwG.visible=gliding;
-  // legs: fully hidden until ~30° below horizon, fully in at straight-down
   const down=clamp((-player.pitch-0.55)/(PITCH_LIM-0.55),0,1);
   legsG.visible=down>0&&!gliding;
   legsG.position.set(0,(down-1)*1.15+bobY*2,0);
 }
 
-/* ---------------- hotbar UI ---------------- */
+/* ---- hotbar UI ---- */
 function tileIcon(tile,size=40){
   const c=document.createElement('canvas');c.width=c.height=size;
   const g=c.getContext('2d');g.imageSmoothingEnabled=false;
@@ -1560,12 +1360,7 @@ function updateHotbar(){
   $('heldName').textContent=BLOCK_DEF[b].name+' × '+(inv[b]||0);
 }
 
-/* ---------------- HUD / debug ----------------
-   NO dig-site intel here on purpose — the debug overlay is technical
-   info only. Site locations are revealed solely through the ECHO
-   client's Chunkfinder markers (half of which are ghosts). Rain state
-   is shown since the trident depends on it. The "layer" line tells you
-   which stratum of the deep world you're standing in.                  */
+/* ---- HUD ---- */
 let frames=0,fps=0,lastFpsT=performance.now(),lastHudT=0;
 function updateHud(now){
   frames++;
@@ -1577,15 +1372,14 @@ function updateHud(now){
   const dir=Math.abs(look.x)>Math.abs(look.z)?(look.x>0?'EAST':'WEST'):(look.z>0?'SOUTH':'NORTH');
   const pcx=Math.floor(p.x)>>4,pcz=Math.floor(p.z)>>4;
   const hit=inputOn()&&!cheat.freecam.on?raycastVoxel(camera.position,look,REACH):null;
-  // which layer are we in? (relative to this column's actual surface)
   const surf=heightAt(Math.floor(p.x),Math.floor(p.z));
-  const L=p.y>surf+1?'air':p.y>=surf?'grass':p.y>=surf-6?'dirt':p.y>=0?'stone':p.y>=-59?'deepslate':'bedrock';
+  const L=p.y>surf+1?(playerInWater?'water':'air'):p.y>=surf?(surf<=SEA_LEVEL+1?'sand':'grass'):p.y>=surf-6?'dirt':p.y>=0?'stone':p.y>=-59?'deepslate':'bedrock';
+  $('coords').textContent=`XYZ  ${p.x.toFixed(1)} / ${p.y.toFixed(1)} / ${p.z.toFixed(1)}`;
   $('debug').textContent=
-`DEEPSLATE  ${fps} fps
-XYZ  ${p.x.toFixed(1)} / ${p.y.toFixed(1)} / ${p.z.toFixed(1)}   chunk ${pcx},${pcz}   layer ${L}
+`DEEPSLATE  ${fps} fps   chunk ${pcx},${pcz}   layer ${L}
 facing ${dir}   pitch ${(player.pitch*57.3).toFixed(0)}°   sens ${Math.round(sensMult*100)}%
 target ${hit?BLOCK_DEF[hit.block].name+' ('+hit.x+' '+hit.y+' '+hit.z+')':'—'}
-ground ${player.onGround?'YES':'NO'}   glide ${gliding?'YES':'NO'}   rain ${weather.on?'YES':'NO'}   mouse ${locked()?'captured':(softLock?'fallback':'—')}
+ground ${player.onGround?'YES':'NO'}   swim ${playerInWater?'YES':'NO'}   glide ${gliding?'YES':'NO'}   rain ${weather.on?'YES':'NO'}   deep ${deepUnlocked.size}ch   mouse ${locked()?'captured':(softLock?'fallback':'—')}
 seed ${SEED}`;
   const gh=$('glideHud');
   if(gliding){gh.classList.remove('hidden');$('glideSpd').textContent=player.vel.length().toFixed(1);}
@@ -1593,18 +1387,14 @@ seed ${SEED}`;
   if(cheatOpen){
     $('cmPos').textContent=`XYZ ${p.x.toFixed(0)} ${p.y.toFixed(0)} ${p.z.toFixed(0)}`;
     $('cmMeta').textContent=`${fps} fps · ${chunks.size} chunks`;
+    $('acStat').textContent=deepUnlocked.size+' synced';
   }
 }
 
-/* ---------------- camera & fov ---------------- */
+/* ---- camera ---- */
 function updateCamera(dt){
-  if(cheat.freecam.on){
-    camera.position.copy(fc.pos);
-    camera.rotation.set(fc.pitch,fc.yaw,0);
-  }else{
-    camera.position.set(player.pos.x,player.pos.y+EYE,player.pos.z);
-    camera.rotation.set(player.pitch,player.yaw,0);
-  }
+  if(cheat.freecam.on){camera.position.copy(fc.pos);camera.rotation.set(fc.pitch,fc.yaw,0);}
+  else{camera.position.set(player.pos.x,player.pos.y+EYE,player.pos.z);camera.rotation.set(player.pitch,player.yaw,0);}
   fovKick=Math.max(0,fovKick-fovKick*6*dt);
   let target=75+(sprinting?5:0);
   if(gliding)target+=clamp((player.vel.length()-14)*0.45,0,14);
@@ -1614,10 +1404,7 @@ function updateCamera(dt){
   handCam.updateProjectionMatrix();
 }
 
-/* ---------------- boot / enter / disconnect ----------------
-   enterWorld() serves both the first join and every reconnect after a
-   disconnect. The world (chunk edits, inventory, position) lives in
-   memory the whole time — disconnect just parks you at the menu.    */
+/* ---- boot / disconnect ---- */
 let hasJoined=false;
 function enterWorld(){
   const rejoined=hasJoined;
@@ -1625,49 +1412,57 @@ function enterWorld(){
   AU.init();if(AU.ctx.state==='suspended')AU.ctx.resume();
   started=true;
   $('boot').classList.add('hidden');
-  for(const id of['cross','debug','hotbar','heldName'])$(id).classList.remove('hidden');
-  refreshStreaming(true);          // instant on reconnect — everything is already meshed
+  for(const id of['cross','coords','debug','hotbar','heldName'])$(id).classList.remove('hidden');
+  refreshStreaming(true);
+  espGroup.visible=cheat.esp.on;
+  if(cheat.esp.on)refreshESP();
+  updateWatermark();
+  syncMenuUI();
+  updateDeepVisibility();
   attemptLock();syncCursor();
-  // weather picks up exactly where the clock stopped
   rainMesh.visible=weather.on;
   if(weather.on)AU.rainSet(true);
   if(rejoined){
     setTimeout(()=>toast('Reconnected — picking up where you left off'),400);
+    if(cheat.esp.on)setTimeout(()=>toast('Basefinder still running','cheat'),1400);
+    if(deepFlushed>0)setTimeout(()=>toast(`ANTI-CHEAT · deepslate data synced — ${deepFlushed} chunk${deepFlushed===1?'':'s'} now visible in freecam`,'cheat'),2200);
   }else{
     setTimeout(()=>toastOnce('t1','Press [1] to draw your pickaxe'),900);
     setTimeout(()=>toastOnce('t2','Hold LMB on a block to mine it — blocks go to your hotbar'),6500);
     setTimeout(()=>toastOnce('t3','Double-tap SPACE anywhere — even on the ground — to deploy your elytra'),13000);
-    setTimeout(()=>toastOnce('t4','Press [2] for the trident — RMB riptides once the rain rolls in'),19000);
+    setTimeout(()=>toastOnce('t4','Press [2] for the trident — RMB riptides in rain or water'),19000);
     setTimeout(()=>toastOnce('t5','[ / ] adjust look sensitivity · RSHIFT opens ECHO','cheat'),25000);
   }
 }
 function disconnect(){
   if(!started)return;
-  // drop all volatile state — you rejoin standing still, same spot
   for(const k in keys)keys[k]=false;
   mouseL=mouseR=false;
-  gliding=false;glideLaunchT=0;
+  gliding=false;glideLaunchT=0;ripWaterT=0;
   player.vel.set(0,0,0);
   acc=0;
-  if(cheat.freecam.on){cheat.freecam.on=false;syncMenuUI();updateWatermark();}
-  if(cheat.esp.on){cheat.esp.on=false;espGroup.visible=false;syncMenuUI();updateWatermark();}
+  if(cheat.freecam.on){cheat.freecam.on=false;syncMenuUI();}
+  deepFlushed=0;
+  for(const k of deepPending){if(!deepUnlocked.has(k)){deepUnlocked.add(k);deepFlushed++;}}
+  deepPending.clear();
   if(cheatOpen){cheatOpen=false;$('cheatMenu').classList.add('hidden');}
   if(paused){paused=false;$('pause').classList.add('hidden');}
   hlBox.visible=false;crackBox.visible=false;
   mineKey=null;mineProg=0;
   started=false;
-  AU.rainSet(false);               // silence the storm at the menu
-  // boot screen in resume mode — world preserved, instant rejoin
-  for(const id of['cross','debug','hotbar','heldName','glideHud','wm'])$(id).classList.add('hidden');
+  AU.rainSet(false);
+  for(const id of['cross','coords','debug','hotbar','heldName','glideHud','wm'])$(id).classList.add('hidden');
   $('bootFill').style.width='100%';
-  $('bootNote').textContent=`world preserved — rejoin at ${player.pos.x.toFixed(0)} / ${player.pos.y.toFixed(0)} / ${player.pos.z.toFixed(0)}`;
+  let note=`world preserved — rejoin at ${player.pos.x.toFixed(0)} / ${player.pos.y.toFixed(0)} / ${player.pos.z.toFixed(0)}`;
+  if(cheat.esp.on)note+=' · basefinder armed';
+  if(deepFlushed>0)note+=` · deepslate synced ${deepFlushed}ch`;
+  $('bootNote').textContent=note;
   $('btnEnter').disabled=false;
   $('btnEnter').textContent='RECONNECT';
   $('boot').classList.remove('hidden');
   syncCursor();
 }
  $('btnDisconnect').addEventListener('click',e=>{e.target.blur();disconnect();});
-
 buildHotbar();updateHotbar();syncMenuUI();applyRainDensity();
  $('bootSeed').textContent=SEED;$('pauseSeed').textContent=SEED;
 refreshStreaming(true);bootTotal=queue.length;
@@ -1682,19 +1477,16 @@ const bootStep=()=>{
 requestAnimationFrame(bootStep);
  $('btnEnter').addEventListener('click',e=>{e.target.blur();enterWorld();});
 
-/* ---------------- main loop ---------------- */
+/* ---- main loop ---- */
 let lastT=performance.now(),acc=0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(0.1,(now-lastT)/1000);lastT=now;
   if(started){
-    if(!paused){                          // physics + weather clock freeze while paused
-      acc+=dt;let n=0;
-      while(acc>=STEP&&n<5){physStep(STEP);acc-=STEP;n++;}
-      updateWeatherCycle(dt);
-    }else acc=0;
+    if(!paused){acc+=dt;let n=0;while(acc>=STEP&&n<5){physStep(STEP);acc-=STEP;n++;}updateWeatherCycle(dt);}else acc=0;
     refreshStreaming(false);
     processQueue(4);
+    updateDeepVisibility();
     updateCamera(dt);
     updateMining(dt);
     updateRiptide(dt);
@@ -1702,29 +1494,24 @@ function loop(now){
     updateParticles(dt);
     updateClouds(dt);
     updateRain(dt);
-    updateWeatherFX(dt,now/1000);
+    const eyeUnder=getBlock(Math.floor(camera.position.x),Math.floor(camera.position.y),Math.floor(camera.position.z))===WATER;
+    $('waterFx').classList.toggle('hidden',!eyeUnder);
+    updateWeatherFX(dt,now/1000,eyeUnder);
+    if(eyeUnder&&!paused){bubbleT-=dt;if(bubbleT<=0){bubbleT=0.3+Math.random()*0.45;spawnBurst(camera.position.x+(Math.random()-0.5)*0.4,camera.position.y-0.2,camera.position.z+(Math.random()-0.5)*0.4,0xcfeaff,2,0.5,4);}}
+    uTime.value=now/1000;
+    waterTex.offset.x=(now/1000*0.025)%1;
+    waterTex.offset.y=(now/1000*0.011)%1;
     updateESP(now/1000);
     updateHud(now);
-    if(boostTrail>0){
-      boostTrail-=dt;
-      const look=getLookDir(tmpA);
-      spawnBurst(camera.position.x-look.x*0.8,camera.position.y-look.y*0.8,camera.position.z-look.z*0.8,Math.random()<0.5?0xffb347:0xfff1d0,2,1.2);
-    }
-    if(ripTrail>0){                       // brief cyan water-wake after a riptide
-      ripTrail-=dt;
-      const p=player.pos;
-      spawnBurst(p.x,p.y+0.6+Math.random(),p.z,Math.random()<0.5?0x59d7ff:0xbef1ff,2,1.4);
-    }
+    if(boostTrail>0){boostTrail-=dt;const look=getLookDir(tmpA);spawnBurst(camera.position.x-look.x*0.8,camera.position.y-look.y*0.8,camera.position.z-look.z*0.8,Math.random()<0.5?0xffb347:0xfff1d0,2,1.2);}
+    if(ripTrail>0){ripTrail-=dt;const p=player.pos;spawnBurst(p.x,p.y+0.6+Math.random(),p.z,Math.random()<0.5?0x59d7ff:0xbef1ff,2,1.4);}
   }else{
     camera.position.set(player.pos.x,player.pos.y+EYE,player.pos.z);
     camera.rotation.set(player.pitch,player.yaw,0);
   }
   renderer.clear();
   renderer.render(scene,camera);
-  if(started&&!cheat.freecam.on){
-    renderer.clearDepth();
-    renderer.render(handScene,handCam);
-  }
+  if(started&&!cheat.freecam.on){renderer.clearDepth();renderer.render(handScene,handCam);}
 }
 requestAnimationFrame(loop);
 </script>
