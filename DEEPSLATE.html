@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEEPSLATE — Voxel Excavation Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10; --panel:rgba(13,15,20,.92); --line:rgba(255,255,255,.09);
+  --txt:#e9e6dd; --dim:#8b8f98; --red:#ff3b43; --ok:#7ecb5f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Chakra Petch',sans-serif}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hidden{display:none!important}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50}
+body.nocursor{cursor:none}
+
+/* ---------- HUD ---------- */
+#vig{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at center,transparent 63%,rgba(0,0,0,.26) 100%)}
+#cross{position:fixed;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);z-index:20;pointer-events:none;mix-blend-mode:difference}
+#cross::before,#cross::after{content:'';position:absolute;background:#fff}
+#cross::before{left:8px;top:0;width:2px;height:18px}
+#cross::after{top:8px;left:0;width:18px;height:2px}
+#debug{position:fixed;left:14px;top:12px;font-size:11px;line-height:1.7;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:20;pointer-events:none;white-space:pre;letter-spacing:.4px}
+#debug em{color:#9fe07c;font-style:normal}
+#wm{position:fixed;right:14px;top:12px;font-family:'Silkscreen';font-size:10px;letter-spacing:1px;color:var(--red);border:1px solid rgba(255,59,67,.5);background:rgba(22,8,10,.6);padding:5px 9px;border-radius:3px;z-index:20}
+#glideHud{position:fixed;right:14px;bottom:18px;text-align:right;font-family:'Silkscreen';color:#fff;text-shadow:0 1px 3px #000;z-index:20}
+#glideHud .spd{font-size:20px}
+#glideHud .lbl{font-size:9px;letter-spacing:2px;color:#cfd3da}
+#heldName{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);font-family:'Silkscreen';font-size:11px;letter-spacing:1px;color:#fff;text-shadow:0 1px 3px #000;z-index:20}
+#hotbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:5px;z-index:20}
+.slot{width:46px;height:46px;background:rgba(10,12,16,.72);border:1px solid rgba(255,255,255,.16);border-radius:4px;position:relative;display:flex;align-items:center;justify-content:center;transition:transform .08s}
+.slot.sel{border-color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.3);transform:translateY(-3px)}
+.slot canvas{width:32px;height:32px;image-rendering:pixelated}
+.slot .ct{position:absolute;right:3px;bottom:0;font-size:10px;font-family:'Silkscreen';color:#fff;text-shadow:0 1px 2px #000}
+.slot.empty canvas{opacity:.22;filter:grayscale(.8)}
+#toasts{position:fixed;left:14px;bottom:18px;display:flex;flex-direction:column;gap:6px;z-index:40}
+.toast{background:rgba(10,12,16,.88);border:1px solid var(--line);border-left:3px solid #cfd3da;padding:7px 12px;font-size:12px;border-radius:3px;max-width:340px;animation:tIn .18s ease}
+.toast.cheat{border-left-color:var(--red)}
+.toast.good{border-left-color:var(--ok)}
+.toast.out{opacity:0;transform:translateX(-8px);transition:.3s}
+@keyframes tIn{from{opacity:0;transform:translateX(-8px)}}
+/* HUD must never eat clicks (matters in fallback mouse mode) */
+#debug,#cross,#wm,#glideHud,#heldName,#hotbar,#toasts{pointer-events:none}
+
+/* ---------- shared panel bits ---------- */
+.btn{font-family:'Silkscreen';font-size:13px;letter-spacing:2px;padding:13px 36px;background:none;border:1px solid var(--txt);color:var(--txt);cursor:pointer;transition:background .12s,color .12s}
+.btn:hover:not(:disabled){background:var(--txt);color:#0a0c10}
+.btn:disabled{opacity:.35;cursor:default}
+kbd{font-family:'Chakra Petch';font-size:10px;font-weight:600;letter-spacing:1px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 6px;background:rgba(255,255,255,.05);color:#cfd3da}
+
+/* ---------- boot ---------- */
+#boot{background:#0a0c10;z-index:100;flex-direction:column;gap:22px}
+.boot-inner{display:flex;flex-direction:column;align-items:center;gap:20px;max-width:560px;text-align:center}
+.boot-logo{font-family:'Silkscreen';font-weight:700;font-size:52px;letter-spacing:10px;color:var(--txt)}
+.boot-logo b{color:var(--ok)}
+.boot-sub{font-size:11px;letter-spacing:6px;color:var(--dim)}
+.boot-bar{width:280px;height:3px;background:rgba(255,255,255,.1)}
+.boot-bar i{display:block;height:100%;width:0%;background:var(--ok);transition:width .12s}
+.boot-note{font-size:11px;color:var(--dim);letter-spacing:1px;min-height:14px}
+.keys{display:grid;grid-template-columns:auto auto;gap:7px 26px;font-size:12px;color:var(--dim);text-align:left}
+.keys div{display:flex;justify-content:space-between;gap:16px;min-width:210px}
+.boot-foot{font-size:10px;letter-spacing:1px;color:#565a63;margin-top:4px}
+.boot-foot b{color:var(--dim)}
+
+/* ---------- pause ---------- */
+#pause{background:rgba(6,8,11,.72);backdrop-filter:blur(4px);z-index:60}
+.pp-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:34px 40px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.pp-title{font-family:'Silkscreen';font-size:24px;letter-spacing:6px}
+.pp-sub{font-size:11px;color:var(--dim);letter-spacing:1px}
+.pp-sub b{color:var(--txt)}
+
+/* ---------- cheat client (tabbed) ---------- */
+#cheatMenu{background:rgba(4,5,8,.45);backdrop-filter:blur(3px);z-index:55}
+.cm-panel{width:440px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.65)}
+.cm-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.cm-logo{width:24px;height:24px;flex:none}
+.cm-title{font-family:'Silkscreen';font-size:14px;letter-spacing:3px}
+.cm-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:1px}
+.cm-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:2px;color:var(--ok)}
+.cm-status i{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.25}}
+.cm-tabs{display:flex;border-bottom:1px solid var(--line)}
+.cm-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 2px 10px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--dim);font-family:'Silkscreen';font-size:9px;letter-spacing:1.5px;cursor:pointer;transition:color .12s,border-color .12s}
+.cm-tab:hover{color:var(--txt)}
+.cm-tab.active{color:var(--txt);border-bottom-color:var(--red)}
+.cm-tab:focus{outline:none}
+.cm-dot{width:5px;height:5px;border-radius:50%;background:var(--red);opacity:0;transition:opacity .15s;flex:none}
+.cm-dot.on{opacity:1}
+.cm-cat{padding:12px 16px 5px;font-size:9px;letter-spacing:4px;color:var(--dim)}
+.cm-mod{display:flex;align-items:center;gap:12px;padding:9px 16px}
+.cm-mod:hover{background:rgba(255,255,255,.03)}
+.cm-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.cm-desc{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.45}
+.cm-slider{display:flex;align-items:center;gap:12px;padding:2px 16px 10px;font-size:10px;letter-spacing:2px;color:var(--dim)}
+.cm-slider b{color:var(--txt);min-width:34px;text-align:right;font-size:11px}
+input[type=range]{flex:1;accent-color:var(--red);height:3px;cursor:pointer}
+.sw{position:relative;width:40px;height:20px;flex:none;cursor:pointer;margin-left:auto}
+.sw input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;z-index:1}
+.sw i{position:absolute;inset:0;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.05);transition:.15s}
+.sw i::before{content:'';position:absolute;left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--dim);transition:.15s}
+.sw input:checked+i{border-color:var(--red);background:rgba(255,59,67,.14)}
+.sw input:checked+i::before{left:23px;background:var(--red)}
+.cm-empty{min-height:158px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 26px;text-align:center;color:#565a63}
+.cm-empty-ico{width:26px;height:26px;opacity:.65;margin-bottom:2px}
+.cm-empty-t{font-family:'Silkscreen';font-size:10px;letter-spacing:3px;color:var(--dim)}
+.cm-empty-s{font-size:11px;line-height:1.5}
+.cm-foot{display:flex;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--line);font-size:10px;color:var(--dim);letter-spacing:1px;font-family:'Chakra Petch'}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="vig"></div>
+<div id="cross" class="hidden"></div>
+<div id="debug" class="hidden"></div>
+<div id="wm" class="hidden"></div>
+<div id="glideHud" class="hidden"><div class="spd" id="glideSpd">0.0</div><div class="lbl">M/S · GLIDING</div></div>
+<div id="heldName" class="hidden"></div>
+<div id="hotbar" class="hidden"></div>
+<div id="toasts"></div>
+
+<!-- ================= ECHO cheat client (tabbed) ================= -->
+<div id="cheatMenu" class="overlay hidden">
+  <div class="cm-panel">
+    <div class="cm-head">
+      <svg class="cm-logo" viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="#ff3b43" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#ff3b43"/></svg>
+      <div><div class="cm-title">ECHO</div><div class="cm-sub">VOXEL UTILITY CLIENT · v1.4.1</div></div>
+      <div class="cm-status"><i></i>ATTACHED</div>
+    </div>
+    <div class="cm-tabs">
+      <button class="cm-tab" data-tab="render"><span>RENDER</span><i class="cm-dot"></i></button>
+      <button class="cm-tab" data-tab="espesp"><span>ECHO ESP</span><i class="cm-dot"></i></button>
+      <button class="cm-tab active" data-tab="echo"><span>ECHO</span><i class="cm-dot"></i></button>
+      <button class="cm-tab" data-tab="world"><span>WORLD</span><i class="cm-dot"></i></button>
+    </div>
+    <div class="cm-body">
+      <!-- RENDER -->
+      <div class="cm-pane hidden" data-pane="render">
+        <div class="cm-empty">
+          <svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
+          <div class="cm-empty-t">NO MODULES</div>
+          <div class="cm-empty-s">no render modules yet — this category is standing by</div>
+        </div>
+      </div>
+      <!-- ECHO ESP -->
+      <div class="cm-pane hidden" data-pane="espesp">
+        <div class="cm-cat">ESP</div>
+        <div class="cm-mod">
+          <div><div class="cm-name">Chunkfinder</div><div class="cm-desc">Outlines possible dig sites on the grass layer. Drawn through terrain. ESP accuracy not guaranteed — some marks are ghosts.</div></div>
+          <label class="sw"><input type="checkbox" id="swEsp"><i></i></label>
+        </div>
+        <div class="cm-slider"><span>RANGE</span><input type="range" id="rgEsp" min="2" max="40" step="1" value="12"><b id="espVal">12</b></div>
+      </div>
+      <!-- ECHO -->
+      <div class="cm-pane" data-pane="echo">
+        <div class="cm-cat">MOVEMENT</div>
+        <div class="cm-mod">
+          <div><div class="cm-name">Freecam <kbd>C</kbd></div><div class="cm-desc">Detached camera with full 360° rotation — flies where you look. Space / Shift vertical, wheel adjusts speed.</div></div>
+          <label class="sw"><input type="checkbox" id="swFreecam"><i></i></label>
+        </div>
+        <div class="cm-slider"><span>SPEED</span><input type="range" id="rgFcSpeed" min="2" max="40" step="1" value="14"><b id="fcSpeedVal">14</b></div>
+        <div class="cm-cat">TRIDENT</div>
+        <div class="cm-mod">
+          <div><div class="cm-name">Echo Trident <kbd>2</kbd></div><div class="cm-desc">Riptide tuning for the trident. Boost stacks extra speed on top of the launch.</div></div>
+        </div>
+        <div class="cm-slider"><span>BOOST</span><input type="range" id="rgTriBoost" min="0" max="150" step="5" value="0"><b id="triBoostVal">+0%</b></div>
+        <div class="cm-mod">
+          <div><div class="cm-name">No Rain</div><div class="cm-desc">When off, the trident only riptides while it's raining. On — any weather.</div></div>
+          <label class="sw"><input type="checkbox" id="swNoRain"><i></i></label>
+        </div>
+        <div class="cm-cat">CLIENT</div>
+        <div class="cm-mod">
+          <div><div class="cm-name">Sensitivity <kbd>[</kbd><kbd>]</kbd></div><div class="cm-desc">Mouse look speed. Adjust in-game with [ and ] — saved automatically.</div></div>
+        </div>
+        <div class="cm-slider"><span>LOOK SPEED</span><input type="range" id="rgSens" min="20" max="300" step="5" value="100"><b id="sensVal">100%</b></div>
+      </div>
+      <!-- WORLD -->
+      <div class="cm-pane hidden" data-pane="world">
+        <div class="cm-empty">
+          <svg class="cm-empty-ico" viewBox="0 0 24 24"><path d="M12 3 L21 12 L12 21 L3 12 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
+          <div class="cm-empty-t">NO MODULES</div>
+          <div class="cm-empty-s">no world modules yet — this category is standing by</div>
+        </div>
+      </div>
+    </div>
+    <div class="cm-foot"><span id="cmPos">—</span><span id="cmMeta">—</span></div>
+  </div>
+</div>
+
+<!-- ================= pause ================= -->
+<div id="pause" class="overlay hidden">
+  <div class="pp-panel">
+    <div class="pp-title">PAUSED</div>
+    <div class="pp-sub">world seed <b id="pauseSeed"></b></div>
+    <button class="btn" id="btnResume">RESUME</button>
+    <div class="keys">
+      <div><span>Move / Jump</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div>
+      <div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div>
+      <div><span>Pickaxe</span><span><kbd>1</kbd></span></div>
+      <div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div>
+      <div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div>
+      <div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div>
+      <div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
+      <div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div>
+      <div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div>
+      <div><span>Freecam</span><span><kbd>C</kbd></span></div>
+      <div><span>Debug overlay</span><span><kbd>F3</kbd></span></div>
+      <div><span>Mute audio</span><span><kbd>M</kbd></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= boot ================= -->
+<div id="boot" class="overlay">
+  <div class="boot-inner">
+    <div class="boot-logo">DEEP<b>SLATE</b></div>
+    <div class="boot-sub">VOXEL EXCAVATION SANDBOX</div>
+    <div class="boot-bar"><i id="bootFill"></i></div>
+    <div class="boot-note" id="bootNote">carving terrain…</div>
+    <button class="btn" id="btnEnter" disabled>ENTER WORLD</button>
+    <div class="keys">
+      <div><span>Move / Jump</span><span><kbd>WASD</kbd> <kbd>SPACE</kbd></span></div>
+      <div><span>Elytra (anywhere)</span><span><kbd>SPACE ×2</kbd></span></div>
+      <div><span>Pickaxe</span><span><kbd>1</kbd></span></div>
+      <div><span>Trident (riptide)</span><span><kbd>2</kbd></span></div>
+      <div><span>Mine / Place / Boost</span><span><kbd>LMB</kbd> <kbd>RMB</kbd></span></div>
+      <div><span>Camera turn</span><span><kbd>ARROWS</kbd></span></div>
+      <div><span>Look sensitivity</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
+      <div><span>ECHO client</span><span><kbd>RSHIFT</kbd></span></div>
+      <div><span>ECHO tabs (menu open)</span><span><kbd>1</kbd>–<kbd>4</kbd></span></div>
+      <div><span>Freecam</span><span><kbd>C</kbd></span></div>
+      <div><span>Debug overlay</span><span><kbd>F3</kbd></span></div>
+      <div><span>Mute audio</span><span><kbd>M</kbd></span></div>
+    </div>
+    <div class="boot-foot">seed <b id="bootSeed"></b> · desktop + mouse required · embedded <b>ECHO</b> client (RSHIFT in game)</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* =====================================================================
+   DEEPSLATE — single-file voxel sandbox
+   layer stack (deep world):
+     grass y60 · dirt y59-54 · stone y53-0 · deepslate y-1..-59 ·
+     bedrock y-60 (surface ripples ±2 with the terrain)
+   modules: rng/noise · registry · atlas · worldgen (layers/trees/sites
+   — sites live ONLY in deepslate) · chunk mesher (face culling + vertex
+   AO) · streaming · physics (walk / elytra incl. ground launch / riptide
+   trident — fast, substepped collisions) · timed weather cycle (150s
+   clear ↔ 150s rain) · raycast mining (insta-break pickaxe, deepslate
+   resists) · hand+legs view-model (pickaxe / trident / firework) ·
+   particles · ESP (real + ghost markers, ~50% accurate) · ECHO client
+   UI (tabbed: RENDER / ECHO ESP / ECHO / WORLD) · HUD (no site
+   spoilers) · audio synth · robust pointer-lock manager · main loop
+   ===================================================================== */
+
+/* ---------------- config ---------------- */
+const CS=16, Y_MIN=-63, Y_MAX=89, CH=Y_MAX-Y_MIN+1;   // 3 void under bedrock(-60), build headroom above trees
+const RENDER_R=6, FOG_NEAR=42, FOG_FAR=86;
+const SKY=0x86aee4;
+const GRAV=32, JUMP_V=9.2, WALK=4.4, SPRINT=7.3;
+const REACH=5, STEP=1/60, TERRAIN_AMP=1.6;   // set TERRAIN_AMP=0 for a perfectly flat y60 plain
+const PITCH_LIM=Math.PI/2;  // body camera: full 90° down (feet) and 90° up; freecam is fully unclamped
+const GLIDE_LAUNCH=0.45;    // seconds after a ground-launched glide where contact won't cancel it
+
+/* ---- riptide trident ----
+   Base launch equals what the old build did at BOOST +150%
+   (old base 21 × 2.5 = 52.5). The Echo Trident BOOST slider still stacks
+   on top of this (up to ×2.5 again at +150%).                       */
+const RIPTIDE_V=52.5;     // launch speed along the look vector
+const RIPTIDE_CD=0.35;    // cooldown between boosts (s)
+
+/* ---- timed weather ----
+   Clear and rain alternate on a fixed clock: RAIN_PERIOD seconds clear,
+   then RAIN_PERIOD seconds rain, forever. The cycle starts CLEAR the
+   moment you enter the world and freezes while the game is paused.  */
+const RAIN_PERIOD=150;    // 2.5 minutes per phase → 5 minute full cycle
+
+/* ---- rain ---- */
+const RAIN_N=520;         // max rain streaks
+const RAIN_R=24;          // rain follows the player inside this radius
+
+/* ---- look sensitivity ----
+   The multiplier is user-adjustable ([ / ] keys or the ECHO client slider,
+   under the ECHO tab) and persisted.                                    */
+const SENS_DEF=0.0044;    // radians of yaw per mouse pixel at 100%
+let sensMult=1;
+try{const v=parseFloat(localStorage.getItem('ds_sens'));if(isFinite(v))sensMult=Math.min(3,Math.max(0.2,v));}catch(e){}
+let SENS=SENS_DEF*sensMult;
+function setSens(m){
+  sensMult=Math.min(3,Math.max(0.2,m));
+  SENS=SENS_DEF*sensMult;
+  try{localStorage.setItem('ds_sens',String(sensMult));}catch(e){}
+}
+
+/* ---- dig-site placement (very rare, grid placement, overlap-proof) ----
+   The world is divided into SITE_CELL×SITE_CELL-chunk super-cells.
+   Each super-cell independently has a SITE_CHANCE chance of hosting ONE
+   dig site, and the site's footprint is constrained to stay inside its
+   cell with a safety margin. Two sites therefore can NEVER overlap and
+   always keep at least MIN_GAP blocks of solid rock between them.
+   Defaults → roughly ONE site per 800×800 block area.
+   v1.4.1: sites are carved ENTIRELY inside the deepslate band —
+   ceilings y-1..-15, floors down to -58 (bedrock is at -60).
+   Ghosts: each cell can ALSO host a fake marker (same chance, different
+   salt) that the chunkfinder draws identically — but nothing is carved
+   there. Real:ghost ≈ 50:50, so the ESP is only ~50% accurate.
+     more sites   → raise SITE_CHANCE (e.g. 0.08)
+     fewer sites  → lower SITE_CHANCE (e.g. 0.02)
+     more spacing → raise SITE_CELL   (12 or more)
+     thicker rock walls between sites → raise MIN_GAP            */
+const SITE_CELL=10;       // super-cell size in chunks (10 → 160×160 blocks)
+const SITE_CHANCE=0.04;   // 0..1 — chance per super-cell to host a site (and, separately, a ghost)
+const MIN_GAP=8;          // guaranteed solid rock between two sites (blocks)
+const CELL_BLOCKS=SITE_CELL*16;
+
+const qs=new URLSearchParams(location.search);
+const SEED=(parseInt(qs.get('seed'),10)||((Math.random()*2**31)|0))|0;
+
+/* ---------------- rng / noise ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function hash2i(x,z,s){let h=(Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(s,974634617))|0;h^=h>>>13;h=Math.imul(h,1274126177);h^=h>>>16;return h>>>0;}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=THREE.MathUtils.clamp;
+function hash2f(x,z,s){return hash2i(x,z,s)/2147483648-1;}
+function vnoise(x,z,s){
+  const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi;
+  const u=xf*xf*(3-2*xf),v=zf*zf*(3-2*zf);
+  return lerp(lerp(hash2f(xi,zi,s),hash2f(xi+1,zi,s),u),lerp(hash2f(xi,zi+1,s),hash2f(xi+1,zi+1,s),u),v);
+}
+function heightAt(wx,wz){
+  return 60+Math.round(vnoise(wx*0.043,wz*0.043,SEED^0xA17)*TERRAIN_AMP+vnoise(wx*0.11,wz*0.11,SEED^0xB29)*TERRAIN_AMP*0.5);
+}
+
+/* ---------------- block registry ----------------
+   pick = break time WITH the pickaxe (v1.4.1: near-instant on everything
+   except deepslate, which puts up a brief fight); hand = bare hands.   */
+const AIR=0,GRASS=1,DIRT=2,STONE=3,DEEPSLATE=4,LOG=5,LEAVES=6,BEDROCK=7;
+const BLOCK_DEF={
+  [GRASS]:    {name:'Grass Block',tiles:[1,1,2,0,1,1],hand:0.9, pick:0.05,color:0x6da84e},
+  [DIRT]:     {name:'Dirt',       tiles:[2,2,2,2,2,2],hand:0.75,pick:0.05,color:0x866043},
+  [STONE]:    {name:'Stone',      tiles:[3,3,3,3,3,3],hand:6.0, pick:0.05,color:0x7f7f7f},
+  [DEEPSLATE]:{name:'Deepslate',  tiles:[4,4,4,4,4,4],hand:8.5, pick:0.4, color:0x50525a},
+  [LOG]:      {name:'Oak Log',    tiles:[5,5,6,6,5,5],hand:2.7, pick:0.05,color:0x6b5032},
+  [LEAVES]:   {name:'Oak Leaves', tiles:[7,7,7,7,7,7],hand:0.35,pick:0.05,color:0x3a702c},
+  [BEDROCK]:  {name:'Bedrock',    tiles:[8,8,8,8,8,8],hand:Infinity,pick:Infinity,color:0x3c3c3c},
+};
+
+/* ---------------- texture atlas (procedural pixel art) ---------------- */
+function buildAtlas(){
+  const cv=document.createElement('canvas');cv.width=cv.height=64;
+  const g=cv.getContext('2d');
+  const R=mulberry32(0x51A7E);
+  const px=(t,fn)=>{const ox=(t%4)*16,oy=((t/4)|0)*16;
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=fn(x,y);g.fillRect(ox+x,oy+y,1,1);}};
+  const cl=(r,gr,b,v)=>{const d=(R()*2-1)*v;return`rgb(${(r+d)|0},${(gr+d)|0},${(b+d)|0})`;};
+  px(0,()=>R()<0.06?cl(88,140,52,10):cl(112,168,70,13));                                   // grass top
+  px(1,(x,y)=>{if(y<3||(y===3&&R()<0.55))return cl(106,160,66,12);return cl(134,96,67,11);});// grass side
+  px(2,()=>R()<0.08?cl(110,78,52,8):cl(134,96,67,11));                                      // dirt
+  px(3,()=>R()<0.08?cl(105,105,108,6):cl(128,128,131,9));                                   // stone
+  px(4,(x)=>{const gr=(x%4===0)?-10:(x%4===2?6:0);return cl(78+gr,80+gr,86+gr,6);});         // deepslate
+  px(5,(x)=>{const s=(x%4<2)?-16:6;return cl(107+s,80+s*0.7,50+s*0.5,7);});                  // log side
+  px(6,(x,y)=>{const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5));const r=((d|0)%2===0)?12:-8;
+    const e=d>6.5?-25:0;return cl(140+r+e,105+r*0.8+e,66+r*0.6+e,6);});                      // log top
+  px(7,()=>{const r=R();return r<0.16?cl(30,66,24,8):r<0.3?cl(74,126,52,10):cl(52,100,40,12);});// leaves
+  px(8,(x,y)=>{const b=(((x>>1)+(y>>1))%2===0)?72:46;return cl(b,b,b,14);});                 // bedrock
+  return cv;
+}
+function crackTex(stage){
+  const cv=document.createElement('canvas');cv.width=cv.height=16;
+  const g=cv.getContext('2d');g.strokeStyle='rgba(12,12,12,.9)';g.lineWidth=1;
+  const R=mulberry32(77+stage*13);
+  for(let i=0;i<3+stage*2;i++){let x=R()*16,y=R()*16;g.beginPath();g.moveTo(x,y);
+    for(let s=0;s<3+stage;s++){x+=(R()-0.5)*7;y+=(R()-0.5)*7;g.lineTo(x,y);}g.stroke();}
+  const t=new THREE.CanvasTexture(cv);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  return t;
+}
+const atlasCanvas=buildAtlas();
+const atlasTex=new THREE.CanvasTexture(atlasCanvas);
+atlasTex.magFilter=atlasTex.minFilter=THREE.NearestFilter;atlasTex.generateMipmaps=false;
+atlasTex.colorSpace=THREE.SRGBColorSpace;
+const crackTexs=[0,1,2,3,4].map(crackTex);
+
+/* ---------------- three.js core ---------------- */
+const canvas=document.getElementById('game');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.setClearColor(SKY);
+renderer.autoClear=false;
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(SKY,FOG_NEAR,FOG_FAR);
+/* far plane is generous so long-range ESP markers (fog-free) stay visible */
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.08,1200);
+camera.rotation.order='YXZ';
+const worldMat=new THREE.MeshBasicMaterial({map:atlasTex,vertexColors:true});
+
+/* ---------------- world data ---------------- */
+const chunks=new Map();
+const ckey=(cx,cz)=>cx+','+cz;
+
+/* ---------------- dig sites + ghost markers ----------------
+   Real sites: one max per super-cell, footprint strictly inside the cell
+   with a margin of MIN_GAP/2 on every side → sites in neighbouring cells
+   are separated by ≥ MIN_GAP blocks of rock, always. No overlaps
+   possible. Square footprint 20-30, height 10-30, carved ENTIRELY inside
+   the deepslate band (top y -1..-15, floor clamped ≥ -58).
+   Ghosts: same footprint logic, different salt, nothing carved. The
+   chunkfinder draws both identically → ~50% of marks are false.
+   NOTE: nothing in the UI may reveal which is which — dig and see.     */
+const siteCache=new Map();
+function siteForCell(ix,iz){
+  const k=ix+','+iz;
+  if(siteCache.has(k))return siteCache.get(k);
+  let s=null;
+  const r=hash2i(ix,iz,SEED^0x51A7);
+  if((r%1000)<SITE_CHANCE*1000){
+    const rr=mulberry32(r^0x9E3779B9);
+    const size=20+Math.floor(rr()*11);          // 20..30 blocks per side
+    const height=10+Math.floor(rr()*21);        // 10..30 blocks tall
+    const m=Math.ceil(MIN_GAP/2);
+    const span=CELL_BLOCKS-2*m-size;            // jitter room inside the cell
+    const x0=ix*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
+    const z0=iz*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
+    const yTop=-1-Math.floor(rr()*15);          // -1..-15 → always inside deepslate
+    const yBot=Math.max(yTop-height,-58);       // never touches bedrock (-60)
+    s={x0,z0,x1:x0+size-1,z1:z0+size-1,yTop,yBot};
+  }
+  siteCache.set(k,s);return s;
+}
+/* ghost marker — drawn by the ESP, nothing carved (x/z footprint only) */
+const ghostCache=new Map();
+function ghostForCell(ix,iz){
+  const k=ix+','+iz;
+  if(ghostCache.has(k))return ghostCache.get(k);
+  let s=null;
+  const r=hash2i(ix,iz,SEED^0x6E6E6E);          // different salt → independent of real sites
+  if((r%1000)<SITE_CHANCE*1000){
+    const rr=mulberry32(r^0xDEADBEEF);
+    const size=20+Math.floor(rr()*11);
+    const m=Math.ceil(MIN_GAP/2);
+    const span=CELL_BLOCKS-2*m-size;
+    const x0=ix*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
+    const z0=iz*CELL_BLOCKS+m+Math.floor(rr()*(span+1));
+    s={x0,z0,x1:x0+size-1,z1:z0+size-1};
+  }
+  ghostCache.set(k,s);return s;
+}
+function cellOf(cx){return Math.floor(cx/SITE_CELL);}
+
+function genChunkData(cx,cz){
+  const data=new Uint8Array(256*CH);
+  // layer cake: grass y60 · dirt 59-54 · stone 53-0 · deepslate -1..-59 · bedrock -60
+  // (h shifts ±2 with the surface ripple, dirt is always the 6 blocks under grass)
+  for(let lz=0;lz<16;lz++)for(let lx=0;lx<16;lx++){
+    const wx=cx*16+lx,wz=cz*16+lz,h=heightAt(wx,wz);
+    for(let y=Y_MIN;y<=Y_MAX;y++){
+      let b=AIR;
+      if(y===h)b=GRASS;
+      else if(y<h&&y>h-7)b=DIRT;
+      else if(y<=h-7&&y>=0)b=STONE;
+      else if(y<0&&y>=-59)b=DEEPSLATE;
+      else if(y===-60)b=BEDROCK;
+      if(b)data[(y-Y_MIN)*256+lz*16+lx]=b;
+    }
+  }
+  // carve the dig site (if any) of this chunk's super-cell — sites are
+  // constrained inside their own cell, so this is the only one that can
+  // possibly reach into this chunk. Ghosts carve nothing.
+  {
+    const s=siteForCell(cellOf(cx),cellOf(cz));
+    if(s){
+      const x0=Math.max(s.x0,cx*16),x1=Math.min(s.x1,cx*16+15);
+      const z0=Math.max(s.z0,cz*16),z1=Math.min(s.z1,cz*16+15);
+      if(x0<=x1&&z0<=z1)
+        for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)
+          for(let y=s.yBot;y<=s.yTop;y++)data[(y-Y_MIN)*256+(z-cz*16)*16+(x-cx*16)]=AIR;
+    }
+  }
+  // trees (deterministic per world column, so chunk borders agree)
+  for(let tx=cx*16-2;tx<cx*16+18;tx++)for(let tz=cz*16-2;tz<cz*16+18;tz++){
+    const r=hash2i(tx,tz,SEED^0x7EE5);
+    if(r%1000>=14)continue;
+    const h=heightAt(tx,tz),th=4+((r>>>10)%3);
+    const put=(wx,wy,wz,b,force)=>{
+      const lx=wx-cx*16,lz=wz-cz*16;
+      if(lx<0||lx>15||lz<0||lz>15||wy<Y_MIN||wy>Y_MAX)return;
+      const i=(wy-Y_MIN)*256+lz*16+lx;
+      if(force||data[i]===AIR)data[i]=b;
+    };
+    for(let dy=th-2;dy<=th+1;dy++){
+      const rad=dy<=th-1?2:1;
+      for(let dx=-rad;dx<=rad;dx++)for(let dz=-rad;dz<=rad;dz++){
+        if(dy===th+1&&Math.abs(dx)+Math.abs(dz)>1)continue;
+        if(Math.abs(dx)===2&&Math.abs(dz)===2&&((r>>>(dy*2))&1))continue;
+        put(tx+dx,h+dy,tz+dz,LEAVES,false);
+      }
+    }
+    for(let i=1;i<=th;i++)put(tx,h+i,tz,LOG,true);
+  }
+  return data;
+}
+function ensureData(cx,cz){
+  const k=ckey(cx,cz);let c=chunks.get(k);
+  if(!c){c={cx,cz,data:genChunkData(cx,cz),mesh:null,meshed:false};chunks.set(k,c);}
+  return c;
+}
+function getBlock(wx,wy,wz){
+  if(wy<Y_MIN||wy>Y_MAX)return AIR;
+  return ensureData(wx>>4,wz>>4).data[(wy-Y_MIN)*256+(wz&15)*16+(wx&15)];
+}
+function setBlock(wx,wy,wz,b){
+  if(wy<Y_MIN||wy>Y_MAX)return;
+  const cx=wx>>4,cz=wz>>4;
+  ensureData(cx,cz).data[(wy-Y_MIN)*256+(wz&15)*16+(wx&15)]=b;
+  remesh(cx,cz);
+  const lx=wx&15,lz=wz&15;
+  if(lx===0)remesh(cx-1,cz);if(lx===15)remesh(cx+1,cz);
+  if(lz===0)remesh(cx,cz-1);if(lz===15)remesh(cx,cz+1);
+}
+function remesh(cx,cz){const c=chunks.get(ckey(cx,cz));if(c&&c.meshed)meshChunk(cx,cz);}
+
+/* ---------------- chunk mesher (face culling + vertex AO) ---------------- */
+const FACES=[
+  {d:[-1,0,0],c:[[0,1,0],[0,0,0],[0,1,1],[0,0,1]],u:2,v:1,shade:.60},
+  {d:[ 1,0,0],c:[[1,1,1],[1,0,1],[1,1,0],[1,0,0]],u:2,v:1,shade:.66},
+  {d:[0,-1,0],c:[[1,0,1],[0,0,1],[1,0,0],[0,0,0]],u:0,v:2,shade:.50},
+  {d:[0, 1,0],c:[[0,1,1],[1,1,1],[0,1,0],[1,1,0]],u:0,v:2,shade:1.0},
+  {d:[0,0,-1],c:[[1,0,0],[0,0,0],[1,1,0],[0,1,0]],u:0,v:1,shade:.80},
+  {d:[0,0, 1],c:[[0,0,1],[1,0,1],[0,1,1],[1,1,1]],u:0,v:1,shade:.80},
+];
+const AO_LUT=[0.50,0.68,0.84,1.0];
+function meshChunk(cx,cz){
+  const c=ensureData(cx,cz);
+  const nb=[];
+  for(let ox=-1;ox<=1;ox++)for(let oz=-1;oz<=1;oz++)nb[(ox+1)*3+(oz+1)]=ensureData(cx+ox,cz+oz).data;
+  const P=new Uint8Array(18*18*CH);
+  for(let px=-1;px<=16;px++)for(let pz=-1;pz<=16;pz++){
+    const wx=cx*16+px,wz=cz*16+pz;
+    const d=nb[((wx>>4)-cx+1)*3+((wz>>4)-cz+1)];
+    const lx=wx&15,lz=wz&15;
+    for(let y=Y_MIN;y<=Y_MAX;y++)P[(y-Y_MIN)*324+(pz+1)*18+(px+1)]=d[(y-Y_MIN)*256+lz*16+lx];
+  }
+  const pget=(x,y,z)=>{
+    if(y<Y_MIN||y>Y_MAX||x<-1||x>16||z<-1||z>16)return AIR;
+    return P[(y-Y_MIN)*324+(z+1)*18+(x+1)];
+  };
+  const positions=[],uvs=[],colors=[],indices=[];
+  const E=0.018; // uv inset against atlas bleeding
+  for(let y=Y_MIN;y<=Y_MAX;y++)for(let lz=0;lz<16;lz++)for(let lx=0;lx<16;lx++){
+    const b=P[(y-Y_MIN)*324+(lz+1)*18+(lx+1)];
+    if(!b)continue;
+    const tiles=BLOCK_DEF[b].tiles;
+    for(let f=0;f<6;f++){
+      const F=FACES[f];
+      if(pget(lx+F.d[0],y+F.d[1],lz+F.d[2])!==AIR)continue;
+      const tu=tiles[f]%4,tv=(tiles[f]/4)|0;
+      const vi=positions.length/3,ao=[0,0,0,0];
+      for(let cn=0;cn<4;cn++){
+        const cc=F.c[cn];
+        positions.push(lx+cc[0],y+cc[1],lz+cc[2]);
+        const uc=cc[F.u],vc=cc[F.v];
+        uvs.push((tu+E+uc*(1-2*E))/4,((3-tv)+E+vc*(1-2*E))/4);
+        // ambient occlusion: two edge neighbours + corner neighbour of the face
+        const nbx=lx+F.d[0],nby=y+F.d[1],nbz=lz+F.d[2];
+        const su=cc[F.u]?1:-1,sv=cc[F.v]?1:-1;
+        const o1=[0,0,0];o1[F.u]=su;const o2=[0,0,0];o2[F.v]=sv;
+        const s1=pget(nbx+o1[0],nby+o1[1],nbz+o1[2])!==AIR;
+        const s2=pget(nbx+o2[0],nby+o2[1],nbz+o2[2])!==AIR;
+        const co=pget(nbx+o1[0]+o2[0],nby+o1[1]+o2[1],nbz+o1[2]+o2[2])!==AIR;
+        const a=(s1&&s2)?0:3-((s1?1:0)+(s2?1:0)+(co?1:0));
+        ao[cn]=a;
+        const l=F.shade*AO_LUT[a];
+        colors.push(l,l,l);
+      }
+      if(ao[0]+ao[3]>ao[1]+ao[2])indices.push(vi,vi+1,vi+3,vi,vi+3,vi+2);
+      else indices.push(vi,vi+1,vi+2,vi+2,vi+1,vi+3);
+    }
+  }
+  if(c.mesh){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh=null;}
+  if(positions.length){
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    geo.setIndex(indices);
+    const m=new THREE.Mesh(geo,worldMat);
+    m.position.set(cx*16,0,cz*16);m.matrixAutoUpdate=false;m.updateMatrix();
+    scene.add(m);c.mesh=m;
+  }
+  c.meshed=true;
+}
+
+/* ---------------- chunk streaming ---------------- */
+let queue=[],lastPC=null,bootTotal=0;
+function refreshStreaming(force){
+  const pcx=Math.floor(player.pos.x)>>4,pcz=Math.floor(player.pos.z)>>4;
+  if(!force&&lastPC&&lastPC[0]===pcx&&lastPC[1]===pcz)return;
+  lastPC=[pcx,pcz];
+  queue.length=0;
+  for(let dx=-RENDER_R;dx<=RENDER_R;dx++)for(let dz=-RENDER_R;dz<=RENDER_R;dz++){
+    if(dx*dx+dz*dz>RENDER_R*RENDER_R+2)continue;
+    const c=ensureData(pcx+dx,pcz+dz);
+    if(!c.meshed)queue.push([pcx+dx,pcz+dz,dx*dx+dz*dz]);
+  }
+  queue.sort((a,b)=>a[2]-b[2]);
+  for(const c of chunks.values()){
+    if(!c.mesh)continue;
+    const dx=c.cx-pcx,dz=c.cz-pcz;
+    if(dx*dx+dz*dz>(RENDER_R+2)*(RENDER_R+2)){
+      scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh=null;c.meshed=false;
+    }
+  }
+  refreshESP();
+}
+function processQueue(budgetMs){
+  const t0=performance.now();
+  while(queue.length&&performance.now()-t0<budgetMs){
+    const [cx,cz]=queue.shift();
+    const c=ensureData(cx,cz);
+    if(!c.meshed)meshChunk(cx,cz);
+  }
+}
+
+/* ---------------- player ---------------- */
+const player={pos:new THREE.Vector3(8.5,0,8.5),vel:new THREE.Vector3(),onGround:false,yaw:Math.PI*0.75,pitch:-0.12};
+player.pos.y=heightAt(8,8)+1;
+let gliding=false,glideLaunchT=0,pickaxeOn=false,tridentOn=false;
+let riptideCD=0,ripTrail=0;
+
+/* ---------------- audio (tiny synth) ---------------- */
+const AU={ctx:null,master:null,noise:null,muted:false,rainSrc:null,rainGain:null,
+  init(){if(this.ctx)return;
+    this.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    this.master=this.ctx.createGain();this.master.gain.value=0.42;this.master.connect(this.ctx.destination);
+    const b=this.ctx.createBuffer(1,this.ctx.sampleRate,this.ctx.sampleRate);
+    const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    this.noise=b;},
+  nz(dur,type,f0,f1,vol){if(!this.ctx||this.muted)return;
+    const t=this.ctx.currentTime,s=this.ctx.createBufferSource();s.buffer=this.noise;
+    const f=this.ctx.createBiquadFilter();f.type=type;
+    f.frequency.setValueAtTime(f0,t);f.frequency.linearRampToValueAtTime(f1,t+dur);
+    const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    s.connect(f);f.connect(g);g.connect(this.master);s.start(t);s.stop(t+dur);},
+  tone(f0,f1,dur,type,vol){if(!this.ctx||this.muted)return;
+    const t=this.ctx.currentTime,o=this.ctx.createOscillator();o.type=type;
+    o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),t+dur);
+    const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur);},
+  rainSet(on){
+    if(on){
+      if(!this.ctx||this.rainSrc)return;
+      const s=this.ctx.createBufferSource();s.buffer=this.noise;s.loop=true;
+      const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=1100;
+      const g=this.ctx.createGain();g.gain.value=0;
+      g.gain.linearRampToValueAtTime(this.muted?0:0.055,this.ctx.currentTime+1.2);
+      s.connect(f);f.connect(g);g.connect(this.master);s.start();
+      this.rainSrc=s;this.rainGain=g;
+    }else{
+      if(!this.rainSrc)return;
+      const s=this.rainSrc,g=this.rainGain;
+      try{g.gain.linearRampToValueAtTime(0,this.ctx.currentTime+0.5);s.stop(this.ctx.currentTime+0.6);}catch(e){}
+      this.rainSrc=null;this.rainGain=null;
+    }
+  },
+  rainVol(){if(this.rainGain&&this.ctx)this.rainGain.gain.value=this.muted?0:0.055;}
+};
+const sfx={
+  dig(){AU.nz(0.05,'bandpass',500+Math.random()*600,300,0.14);},
+  brk(){AU.nz(0.14,'lowpass',900,180,0.3);AU.tone(170,50,0.12,'triangle',0.18);},
+  place(){AU.tone(200,120,0.09,'square',0.1);},
+  boost(){AU.nz(0.6,'bandpass',350,2600,0.34);AU.tone(90,240,0.5,'sawtooth',0.06);},
+  glide(){AU.nz(0.35,'lowpass',300,1500,0.2);},
+  thud(){AU.tone(120,40,0.16,'triangle',0.22);AU.nz(0.1,'lowpass',500,120,0.2);},
+  riptide(){AU.nz(0.5,'bandpass',2400,260,0.34);AU.tone(160,70,0.42,'triangle',0.16);},
+  thunder(){AU.nz(2.4,'lowpass',280,45,0.24);AU.tone(52,26,2.0,'triangle',0.1);},
+  ui(){AU.tone(700,920,0.05,'sine',0.08);},
+  toggle(){AU.tone(520,640,0.06,'square',0.07);},
+};
+
+/* ---------------- UI helpers ---------------- */
+const $=id=>document.getElementById(id);
+const toastEl=$('toasts');const shownOnce=new Set();
+function toast(msg,tone){
+  const d=document.createElement('div');
+  d.className='toast'+(tone?' '+tone:'');d.textContent=msg;
+  toastEl.appendChild(d);
+  while(toastEl.children.length>5)toastEl.firstChild.remove();
+  setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),320);},2400);
+}
+function toastOnce(key,msg,tone){if(shownOnce.has(key))return;shownOnce.add(key);toast(msg,tone);}
+
+/* ---------------- input + pointer-lock manager ----------------
+   Failures never trigger the pause screen; they either auto-retry after
+   Chrome's post-Esc cooldown (~1.25s) or drop into fallback "soft" mouse
+   mode (delta-look with hidden cursor + arrow-key turning). Pause only
+   ever appears on a genuine user-initiated unlock (Esc).               */
+const keys={};
+let mouseL=false,mouseR=false,started=false,cheatOpen=false;
+let paused=false,softLock=false;
+let lastUnlockAt=-1e9,lastLockTry=-1e9,lastFailAt=-1e9,lockTimer=null,lockRetries=0;
+let lastSpaceTap=0;
+
+const locked=()=>document.pointerLockElement===canvas;
+const inputOn=()=>started&&!paused&&!cheatOpen&&(locked()||softLock);
+
+function syncCursor(){
+  document.body.classList.toggle('nocursor',started&&!paused&&!cheatOpen&&softLock&&!locked());
+}
+function attemptLock(){
+  if(locked())return;
+  clearTimeout(lockTimer);
+  lastLockTry=performance.now();
+  let p;
+  try{p=canvas.requestPointerLock();}
+  catch(err){onLockFail();return;}
+  if(p&&p.then)p.then(()=>{},onLockFail);   // promise-based (Chrome); Firefox uses pointerlockerror
+}
+function onLockFail(){
+  const now=performance.now();
+  if(now-lastFailAt<400)return;               // Chrome fires rejection + error event for one failure
+  lastFailAt=now;
+  if(!started)return;
+  const cooldown=now-lastUnlockAt<3200;       // recently Esc-unlocked → likely Chrome's cooldown
+  if(!softLock){
+    softLock=true;
+    if(!cooldown){
+      toast('Mouse capture unavailable — fallback look mode active','cheat');
+      toastOnce('softTip','Arrow keys also turn the camera · clicking the world retries capture');
+    }
+  }
+  if(cooldown&&lockRetries<2){                // wait out the cooldown, then re-lock seamlessly
+    lockRetries++;
+    clearTimeout(lockTimer);
+    lockTimer=setTimeout(attemptLock,1400);
+  }
+  syncCursor();
+}
+function showPause(){paused=true;$('pause').classList.remove('hidden');syncCursor();}
+function hidePause(){paused=false;$('pause').classList.add('hidden');syncCursor();}
+
+addEventListener('keydown',e=>{
+  if(e.code==='F3'){e.preventDefault();if(started){$('debug').classList.toggle('hidden');}}
+  if(e.code==='Space')e.preventDefault();
+  if(!e.repeat&&started){
+    // while the ECHO menu is open, 1-4 switch tabs (RENDER / ECHO ESP / ECHO / WORLD)
+    const tabIdx=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);
+    if(cheatOpen&&tabIdx>=0){
+      selectTab(TABS[tabIdx]);
+    }
+    else if(e.code==='ShiftRight')toggleMenu();
+    else if(e.code==='Digit1')togglePickaxe();
+    else if(e.code==='Digit2')toggleTrident();
+    else if(e.code==='KeyC')setFreecam(!cheat.freecam.on);   // freecam rebound F → C
+    else if(e.code==='KeyM'){AU.muted=!AU.muted;AU.rainVol();toast(AU.muted?'Audio muted':'Audio on');}
+    else if(e.code==='BracketLeft'||e.code==='BracketRight'){
+      setSens(sensMult*(e.code==='BracketRight'?1.15:1/1.15));
+      syncMenuUI();
+      toast(`Look sensitivity ${Math.round(sensMult*100)}% — [ / ] to adjust`);
+    }
+    else if(e.code==='Escape'){
+      if(cheatOpen)closeMenu();
+      else if(paused){hidePause();attemptLock();}
+      else if(!locked())showPause();          // soft mode: Esc is our manual pause
+    }
+    else if(e.code==='Space')doubleTapSpace();
+  }
+  keys[e.code]=true;
+});
+addEventListener('keyup',e=>keys[e.code]=false);
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseL=mouseR=false;});
+addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('mousedown',e=>{
+  if(!started||cheatOpen||paused)return;
+  if(e.target!==canvas)return;                // ignore clicks that land on HUD/menus in soft mode
+  if(!locked()){
+    if(performance.now()-lastLockTry>2500)attemptLock();  // silent re-try at real capture
+    if(!softLock)return;                     // lock still pending → not a game click yet
+  }
+  if(e.button===1){e.preventDefault();pickBlock();return;}
+  if(e.button===0){mouseL=true;triggerSwing();}
+  if(e.button===2){mouseR=true;placeTimer=0;}
+});
+addEventListener('mouseup',e=>{if(e.button===0)mouseL=false;if(e.button===2)mouseR=false;});
+addEventListener('mousemove',e=>{
+  if(!started||cheatOpen||paused)return;
+  if(!locked()&&!softLock)return;
+  const dx=e.movementX||0,dy=e.movementY||0;
+  if(dx*dx+dy*dy>160000)return;               // guard against spurious movement spikes
+  if(cheat.freecam.on){
+    // freecam: full 360° — pitch is unclamped. Past vertical (|pitch|>90°)
+    // the camera is rolled over, so the yaw axis feels inverted unless we
+    // flip its sign while upside-down
+    fc.yaw-=dx*SENS*(Math.cos(fc.pitch)<0?-1:1);
+    fc.pitch-=dy*SENS;
+  }else{
+    // body camera: yaw unlimited, pitch full ±90° (straight down to your feet / straight up)
+    player.yaw-=dx*SENS;
+    player.pitch=clamp(player.pitch-dy*SENS,-PITCH_LIM,PITCH_LIM);
+  }
+});
+addEventListener('wheel',e=>{
+  if(!started)return;
+  if(cheat.freecam.on){
+    cheat.freecam.speed=clamp(cheat.freecam.speed+(e.deltaY<0?2:-2),2,40);
+    syncMenuUI();return;
+  }
+  if(paused||cheatOpen||!(locked()||softLock))return;
+  hotbarSel=(hotbarSel+(e.deltaY>0?1:-1)+hotbarSlots.length)%hotbarSlots.length;
+  updateHotbar();sfx.ui();
+},{passive:true});
+addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=handCam.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();handCam.updateProjectionMatrix();
+});
+
+/* pointer lock / pause / menu flow */
+document.addEventListener('pointerlockchange',()=>{
+  if(locked()){
+    softLock=false;lockRetries=0;clearTimeout(lockTimer);
+    hidePause();
+  }else{
+    lastUnlockAt=performance.now();
+    if(started&&!cheatOpen&&!paused)showPause();  // genuine Esc-unlock → pause
+  }
+  syncCursor();
+});
+document.addEventListener('pointerlockerror',onLockFail);  // Firefox failure path
+ $('btnResume').addEventListener('click',e=>{e.target.blur();hidePause();attemptLock();});
+function toggleMenu(){cheatOpen?closeMenu():openMenu();}
+function openMenu(){
+  cheatOpen=true;$('cheatMenu').classList.remove('hidden');
+  document.exitPointerLock();
+  syncCursor();
+  toastOnce('welcome','ECHO attached — C toggles freecam anywhere','cheat');
+}
+function closeMenu(){
+  cheatOpen=false;$('cheatMenu').classList.add('hidden');
+  syncCursor();
+  if(started)attemptLock();
+}
+
+/* ---------------- physics ---------------- */
+const EYE=1.62,HW=0.3,PH=1.8;
+function solidAt(x,y,z){return getBlock(Math.floor(x),Math.floor(y),Math.floor(z))!==AIR;}
+function resolveAxis(axis){
+  const p=player.pos,v=player.vel;
+  const x0=Math.floor(p.x-HW),x1=Math.floor(p.x+HW);
+  const y0=Math.floor(p.y),y1=Math.floor(p.y+PH-0.001);
+  const z0=Math.floor(p.z-HW),z1=Math.floor(p.z+HW);
+  let hit=false;
+  for(let x=x0;x<=x1&&!hit;x++)for(let y=y0;y<=y1&&!hit;y++)for(let z=z0;z<=z1&&!hit;z++)
+    if(getBlock(x,y,z)!==AIR)hit=true;
+  if(!hit)return false;
+  const EPS=0.001;
+  if(axis===0){if(v.x>0)p.x=Math.floor(p.x+HW)-HW-EPS;else if(v.x<0)p.x=Math.floor(p.x-HW)+1+HW+EPS;}
+  else if(axis===2){if(v.z>0)p.z=Math.floor(p.z+HW)-HW-EPS;else if(v.z<0)p.z=Math.floor(p.z-HW)+1+HW+EPS;}
+  else{if(v.y<=0)p.y=Math.floor(p.y)+1+EPS;else p.y=Math.floor(p.y+PH-0.001)-PH+0.001-EPS;}
+  return true;
+}
+function moveCollide(dt){
+  const p=player.pos,v=player.vel;let hit=false,ground=false;
+  p.x+=v.x*dt;if(resolveAxis(0)){hit=true;v.x=0;}
+  p.z+=v.z*dt;if(resolveAxis(2)){hit=true;v.z=0;}
+  p.y+=v.y*dt;if(resolveAxis(1)){hit=true;if(v.y<=0)ground=true;v.y=0;}
+  return{hit,ground};
+}
+const tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3();
+function getLookDir(out){return camera.getWorldDirection(out);}
+/* arrow keys turn the camera too (supplements mouse in fallback mode);
+   turn rate scales with the sensitivity setting so both stay in sync */
+function arrowLook(dt){
+  const rx=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);
+  const ry=(keys.ArrowUp?1:0)-(keys.ArrowDown?1:0);
+  if(!rx&&!ry)return;
+  const yawRate=2.6*sensMult,pitchRate=2.0*sensMult;
+  if(cheat.freecam.on){
+    fc.yaw-=rx*yawRate*dt*(Math.cos(fc.pitch)<0?-1:1);
+    fc.pitch+=ry*pitchRate*dt;                // unclamped — full 360°
+  }else{
+    player.yaw-=rx*yawRate*dt;
+    player.pitch=clamp(player.pitch+ry*pitchRate*dt,-PITCH_LIM,PITCH_LIM);
+  }
+}
+function physStep(dt){
+  if(cheat.freecam.on){fcMove(dt);return;}
+  if(!cheatOpen)arrowLook(dt);
+  const io=inputOn();
+  let f=0,s=0;
+  if(io){if(keys.KeyW)f+=1;if(keys.KeyS)f-=1;if(keys.KeyD)s+=1;if(keys.KeyA)s-=1;}
+  const len=Math.hypot(f,s);let wx=0,wz=0;
+  if(len>0){f/=len;s/=len;
+    const sin=Math.sin(player.yaw),cos=Math.cos(player.yaw);
+    wx=-sin*f+cos*s;wz=-cos*f-sin*s;}
+  const sprint=keys.ShiftLeft&&f>0;
+  if(gliding){
+    elytraStep(dt);
+    if(glideLaunchT>0)glideLaunchT-=dt;
+  }else{
+    const spd=sprint?SPRINT:WALK,a=player.onGround?12:3.5,k=Math.min(1,a*dt);
+    player.vel.x+=(wx*spd-player.vel.x)*k;
+    player.vel.z+=(wz*spd-player.vel.z)*k;
+    player.vel.y=Math.max(player.vel.y-GRAV*dt,-50);
+    if(io&&keys.Space&&player.onGround)player.vel.y=JUMP_V;
+  }
+  const wasGround=player.onGround,fall=player.vel.y;
+  // SUBSTEPPED COLLISION: at riptide speeds a single 1/60s step can move
+  // nearly a full block — fast enough to jump clean THROUGH a 1-block
+  // wall without ever overlapping it. So whenever we're moving fast, the
+  // movement is split into slices of ≤0.4 blocks each. (Once an axis
+  // collides its velocity zeroes, so later slices simply stop that axis.)
+  const speed=player.vel.length();
+  const steps=Math.min(20,Math.max(1,Math.ceil(speed*dt/0.4)));
+  const sdt=dt/steps;
+  let hitAny=false,groundAny=false;
+  for(let i=0;i<steps;i++){
+    const col=moveCollide(sdt);
+    hitAny=hitAny||col.hit;
+    groundAny=groundAny||col.ground;
+  }
+  player.onGround=groundAny;
+  // glide ends on ground/wall contact — except during the launch window,
+  // which exists so a ground-started glide can actually get airborne
+  if(gliding&&glideLaunchT<=0&&(hitAny||groundAny))endGlide(true);
+  if(groundAny&&!wasGround&&!gliding&&fall<-13)sfx.thud();
+  sprinting=sprint;
+}
+let sprinting=false;
+/* elytra: velocity steers toward the look vector; gravity projected on the
+   flight path trades altitude for speed (dive = accelerate, pull up = climb).
+   During the ground-launch window gravity along the path is softened so
+   the hop's momentum survives the handover into full glide.            */
+function elytraStep(dt){
+  const v=player.vel,look=getLookDir(tmpA);
+  let sp=v.length();
+  if(sp<0.01){v.copy(look);sp=6;}
+  const cur=tmpB.copy(v).multiplyScalar(1/sp);
+  cur.lerp(look,Math.min(1,3.5*dt)).normalize();
+  const launch=glideLaunchT>0?0.35:1;      // soft gravity while launching from the ground
+  sp+=-26*launch*cur.y*dt;                 // gravity along path
+  sp-=(0.08*sp+0.0038*sp*sp)*dt;           // drag
+  sp=clamp(sp,0,46);
+  v.copy(cur).multiplyScalar(sp);
+  if(glideLaunchT<=0)v.y-=2.6*dt;          // gentle sink in level flight (not during launch)
+  if(v.y<-30)v.y=-30;
+}
+function startGlide(){
+  gliding=true;equipT=0;
+  if(player.onGround){
+    // ground launch: committed hop straight into the glide, with a brief
+    // window where ground contact won't immediately cancel the flight
+    glideLaunchT=GLIDE_LAUNCH;
+    player.vel.y=Math.max(player.vel.y,JUMP_V*0.8);
+    const h=Math.hypot(player.vel.x,player.vel.z);
+    if(h<3){                               // standing still → push off along the look direction
+      const look=getLookDir(tmpA);
+      player.vel.x=look.x*4;
+      player.vel.z=look.z*4;
+    }
+  }else{
+    glideLaunchT=0;
+    if(player.vel.length()>0.5)player.vel.multiplyScalar(0.55);
+    if(player.vel.lengthSq()>1e-6){
+      if(player.vel.length()<4)player.vel.setLength(4);
+    }else{
+      const look=getLookDir(tmpA);
+      player.vel.set(look.x*4,Math.max(look.y*4,1),look.z*4);
+    }
+    player.vel.y=Math.max(player.vel.y,0.5);
+  }
+  toast('Elytra deployed — RMB fires the rocket','good');
+  sfx.glide();
+}
+function endGlide(impact){
+  if(!gliding)return;
+  gliding=false;glideLaunchT=0;equipT=0;
+  toast(impact?'Glide ended — impact':'Elytra stowed');
+}
+/* double-tap SPACE toggles the elytra — from the ground, mid-air, anywhere */
+function doubleTapSpace(){
+  const t=performance.now();
+  if(t-lastSpaceTap<280){
+    lastSpaceTap=0;
+    if(gliding)endGlide(false);
+    else startGlide();
+  }else lastSpaceTap=t;
+}
+/* ---------------- riptide trident ----------------
+   Straight boost along the look vector — elytra-boost feel, no camera
+   spin, no glide. Afterwards normal physics apply (gravity, air drag).
+   Needs rain unless the Echo Trident "No Rain" module is toggled on,
+   and the BOOST slider stacks extra speed on top of the vanilla launch. */
+function toggleTrident(){
+  tridentOn=!tridentOn;equipT=0;
+  if(tridentOn)pickaxeOn=false;            // pickaxe and trident are mutually exclusive
+  toast(tridentOn?'Trident equipped — RMB riptides while it rains':'Trident stowed');
+  sfx.ui();
+}
+function tryRiptide(){
+  if(!tridentOn)return false;
+  if(riptideCD>0)return false;
+  if(!cheat.trident.noRain&&!weather.on){
+    toastOnce('ripDry','Riptide needs rain — storms roll in on a timer (ECHO → No Rain overrides)');
+    return false;
+  }
+  const look=getLookDir(tmpA);
+  const v=RIPTIDE_V*(1+cheat.trident.boost);   // vanilla launch + Echo boost
+  player.vel.multiplyScalar(0.35);             // shed some old momentum, keep the rest
+  player.vel.addScaledVector(look,v);          // clean forward boost along the look vector
+  if(player.onGround)player.vel.y=Math.max(player.vel.y,4.6);
+  riptideCD=RIPTIDE_CD;
+  fovKick=Math.min(fovKick+10+v*0.08,20);
+  boostShake=0.22;
+  ripTrail=0.4;
+  triggerSwing();
+  const p=player.pos;
+  spawnBurst(p.x,p.y+1.2,p.z,0x59d7ff,12,3.4);
+  spawnBurst(p.x,p.y+1.2,p.z,0xbef1ff,6,2);
+  sfx.riptide();
+  return true;
+}
+function updateRiptide(dt){if(riptideCD>0)riptideCD-=dt;}
+/* freecam */
+const fc={pos:new THREE.Vector3(),yaw:0,pitch:0};
+function fcMove(dt){
+  const spd=cheat.freecam.speed;let f=0,s=0,u=0;
+  if(inputOn()){
+    if(keys.KeyW)f+=1;if(keys.KeyS)f-=1;
+    if(keys.KeyD)s+=1;if(keys.KeyA)s-=1;
+    if(keys.Space)u+=1;if(keys.ShiftLeft)u-=1;
+  }
+  if(!f&&!s&&!u)return;
+  // W flies along the FULL view direction (spectator-style), so you can
+  // dive/climb with the mouse now that freecam pitch is unclamped
+  const cp=Math.cos(fc.pitch);
+  const fx=-cp*Math.sin(fc.yaw),fy=Math.sin(fc.pitch),fz=-cp*Math.cos(fc.yaw);
+  const rx=Math.cos(fc.yaw),rz=-Math.sin(fc.yaw);
+  fc.pos.x+=(fx*f+rx*s)*spd*dt;
+  fc.pos.y+=(fy*f+u)*spd*dt;
+  fc.pos.z+=(fz*f+rz*s)*spd*dt;
+}
+
+/* ---------------- raycast (Amanatides & Woo DDA) ---------------- */
+function raycastVoxel(o,d,maxD){
+  let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);
+  const sx=d.x>0?1:-1,sy=d.y>0?1:-1,sz=d.z>0?1:-1;
+  const dtx=d.x!==0?Math.abs(1/d.x):Infinity;
+  const dty=d.y!==0?Math.abs(1/d.y):Infinity;
+  const dtz=d.z!==0?Math.abs(1/d.z):Infinity;
+  let tx=d.x!==0?((sx>0?x+1-o.x:o.x-x)*dtx):Infinity;
+  let ty=d.y!==0?((sy>0?y+1-o.y:o.y-y)*dty):Infinity;
+  let tz=d.z!==0?((sz>0?z+1-o.z:o.z-z)*dtz):Infinity;
+  let nx=0,ny=0,nz=0;
+  for(let i=0;i<200;i++){
+    if(tx<ty&&tx<tz){if(tx>maxD)break;x+=sx;nx=-sx;ny=nz=0;tx+=dtx;}
+    else if(ty<tz){if(ty>maxD)break;y+=sy;ny=-sy;nx=nz=0;ty+=dty;}
+    else{if(tz>maxD)break;z+=sz;nz=-sz;nx=ny=0;tz+=dtz;}
+    const b=getBlock(x,y,z);
+    if(b!==AIR)return{x,y,z,nx,ny,nz,block:b};
+  }
+  return null;
+}
+
+/* ---------------- mining / placing / inventory ---------------- */
+const hotbarSlots=[GRASS,DIRT,STONE,DEEPSLATE,LOG,LEAVES];
+let hotbarSel=0;const inv={};
+let mineKey=null,mineProg=0,digSndT=0,placeTimer=0;
+const breakTime=b=>pickaxeOn?BLOCK_DEF[b].pick:BLOCK_DEF[b].hand;
+function togglePickaxe(){
+  pickaxeOn=!pickaxeOn;equipT=0;
+  if(pickaxeOn)tridentOn=false;            // pickaxe and trident are mutually exclusive
+  toast(pickaxeOn?'Pickaxe equipped':'Pickaxe stowed');
+  sfx.ui();
+}
+function breakBlock(hit){
+  const b=getBlock(hit.x,hit.y,hit.z);
+  setBlock(hit.x,hit.y,hit.z,AIR);
+  inv[b]=(inv[b]||0)+1;updateHotbar();
+  spawnBurst(hit.x+0.5,hit.y+0.5,hit.z+0.5,BLOCK_DEF[b].color,14,3.2);
+  sfx.brk();
+}
+function intersectsPlayer(bx,by,bz){
+  const p=player.pos;
+  return bx+1>p.x-HW&&bx<p.x+HW&&bz+1>p.z-HW&&bz<p.z+HW&&by+1>p.y&&by<p.y+PH;
+}
+function tryPlace(){
+  const hit=raycastVoxel(camera.position,getLookDir(tmpA),REACH);
+  if(!hit)return;
+  const b=hotbarSlots[hotbarSel];
+  if((inv[b]||0)<=0){toastOnce('nb','Out of '+BLOCK_DEF[b].name+' — mine some first');return;}
+  const px=hit.x+hit.nx,py=hit.y+hit.ny,pz=hit.z+hit.nz;
+  if(py<Y_MIN||py>Y_MAX)return;
+  if(getBlock(px,py,pz)!==AIR||intersectsPlayer(px,py,pz))return;
+  setBlock(px,py,pz,b);
+  inv[b]--;updateHotbar();sfx.place();triggerSwing();
+}
+function tryBoost(){
+  if(!gliding)return;
+  const look=getLookDir(tmpA);
+  player.vel.addScaledVector(look,15);
+  if(player.vel.length()>44)player.vel.setLength(44);
+  fovKick=Math.min(fovKick+11,18);boostShake=0.35;boostTrail=0.9;
+  spawnBurst(camera.position.x-look.x*0.5,camera.position.y-look.y*0.5,camera.position.z-look.z*0.5,0xffb347,14,4);
+  spawnBurst(camera.position.x-look.x*0.5,camera.position.y-look.y*0.5,camera.position.z-look.z*0.5,0xfff1d0,6,2);
+  sfx.boost();triggerSwing();
+}
+function pickBlock(){
+  const hit=raycastVoxel(camera.position,getLookDir(tmpA),REACH);
+  if(!hit)return;
+  const i=hotbarSlots.indexOf(hit.block);
+  if(i>=0){hotbarSel=i;updateHotbar();}
+}
+
+/* block highlight + crack overlay */
+const hlBox=new THREE.LineSegments(
+  new THREE.EdgesGeometry(new THREE.BoxGeometry(1.002,1.002,1.002)),
+  new THREE.LineBasicMaterial({color:0x101010,transparent:true,opacity:0.65}));
+hlBox.visible=false;scene.add(hlBox);
+const crackMat=new THREE.MeshBasicMaterial({map:crackTexs[0],transparent:true,depthWrite:false});
+const crackBox=new THREE.Mesh(new THREE.BoxGeometry(1.004,1.004,1.004),crackMat);
+crackBox.visible=false;scene.add(crackBox);
+
+function updateMining(dt){
+  const can=inputOn()&&!cheat.freecam.on;
+  let hit=null;
+  if(can)hit=raycastVoxel(camera.position,getLookDir(tmpA),REACH);
+  if(hit){
+    hlBox.visible=true;
+    hlBox.position.set(hit.x+0.5,hit.y+0.5,hit.z+0.5);
+    if(mouseL){
+      const k=hit.x+'|'+hit.y+'|'+hit.z;
+      if(mineKey!==k){mineKey=k;mineProg=0;}
+      const bt=breakTime(hit.block);
+      if(bt<Infinity){
+        if(swingT>=0.26)triggerSwing();
+        digSndT-=dt;if(digSndT<=0){sfx.dig();digSndT=0.22;}
+        mineProg+=dt/bt;
+        if(mineProg>=1){breakBlock(hit);mineKey=null;mineProg=0;}
+      }
+    }else{mineKey=null;mineProg=0;}
+  }else{hlBox.visible=false;mineKey=null;mineProg=0;}
+  if(mineProg>0&&mineKey){
+    crackBox.visible=true;
+    crackBox.position.copy(hlBox.position);
+    crackMat.map=crackTexs[Math.min(4,Math.floor(mineProg*5))];
+  }else crackBox.visible=false;
+  // held right mouse: firework while gliding > riptide with trident > place.
+  // the trident retry polls fast so it fires the instant its cooldown ends
+  if(mouseR&&inputOn()&&!cheat.freecam.on){
+    placeTimer-=dt;
+    if(placeTimer<=0){
+      if(gliding){tryBoost();placeTimer=0.26;}
+      else if(tridentOn){placeTimer=tryRiptide()?0.35:0.12;}
+      else{tryPlace();placeTimer=0.26;}
+    }
+  }else if(!mouseR)placeTimer=0;
+}
+
+/* ---------------- particles ---------------- */
+const PN=140;
+const pMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(0.09,0.09,0.09),new THREE.MeshBasicMaterial(),PN);
+pMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);scene.add(pMesh);
+const parts=[];const tmpM=new THREE.Matrix4(),tmpC=new THREE.Color();
+for(let i=0;i<PN;i++){parts.push({life:0,max:1,size:1,pos:new THREE.Vector3(),vel:new THREE.Vector3()});pMesh.setColorAt(i,tmpC.setHex(0));}
+let pIdx=0;
+function spawnBurst(x,y,z,color,count,speed){
+  for(let n=0;n<count;n++){
+    const i=pIdx=(pIdx+1)%PN,p=parts[i];
+    p.pos.set(x,y,z);
+    p.vel.set(Math.random()-0.5,Math.random()-0.35,Math.random()-0.5).normalize().multiplyScalar(speed*(0.4+Math.random()*0.7));
+    p.life=p.max=0.35+Math.random()*0.45;p.size=0.6+Math.random()*0.9;
+    pMesh.setColorAt(i,tmpC.setHex(color).offsetHSL(0,0,(Math.random()-0.5)*0.12));
+  }
+  if(pMesh.instanceColor)pMesh.instanceColor.needsUpdate=true;
+}
+function updateParticles(dt){
+  for(let i=0;i<PN;i++){
+    const p=parts[i];
+    if(p.life>0){
+      p.life-=dt;p.vel.y-=20*dt;
+      p.pos.addScaledVector(p.vel,dt);
+      if(getBlock(Math.floor(p.pos.x),Math.floor(p.pos.y),Math.floor(p.pos.z))!==AIR){
+        p.vel.y*=-0.35;p.vel.x*=0.5;p.vel.z*=0.5;p.pos.y+=0.06;
+      }
+      const s=p.size*clamp(p.life/p.max*3,0,1);
+      tmpM.makeScale(s,s,s).setPosition(p.pos);
+    }else tmpM.makeScale(0,0,0).setPosition(0,-999,0);
+    pMesh.setMatrixAt(i,tmpM);
+  }
+  pMesh.instanceMatrix.needsUpdate=true;
+}
+let boostTrail=0;
+
+/* ---------------- clouds ---------------- */
+const cloudMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.5,depthWrite:false,fog:false,side:THREE.DoubleSide});
+const clouds=[];
+{
+  const R=mulberry32(SEED^0xC10D);
+  for(let i=0;i<14;i++){
+    const g=new THREE.Group();
+    const n=2+(R()*2|0);
+    for(let j=0;j<n;j++){
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(10+R()*18,6+R()*10),cloudMat);
+      m.rotation.x=-Math.PI/2;m.position.set((R()-0.5)*22,0,(R()-0.5)*14);
+      g.add(m);
+    }
+    g.position.set((R()-0.5)*300,85+R()*5,(R()-0.5)*300);   // above the new y60 surface
+    scene.add(g);clouds.push(g);
+  }
+}
+function updateClouds(dt){
+  for(const c of clouds){
+    c.position.x+=1.4*dt;
+    if(c.position.x-player.pos.x>160)c.position.x-=320;
+    if(c.position.x-player.pos.x<-160)c.position.x+=320;
+    if(c.position.z-player.pos.z>160)c.position.z-=320;
+    if(c.position.z-player.pos.z<-160)c.position.z-=320;
+  }
+}
+
+/* ---------------- timed weather cycle + rain ----------------
+   weather.on is driven purely by the clock: RAIN_PERIOD seconds clear,
+   RAIN_PERIOD seconds rain, repeating. The cycle starts CLEAR when you
+   enter the world and freezes while paused.                              */
+const weather={on:false};
+let weatherTimer=0;
+function updateWeatherCycle(dt){
+  weatherTimer+=dt;
+  if(weatherTimer>=RAIN_PERIOD){
+    weatherTimer-=RAIN_PERIOD;
+    setWeather(!weather.on);
+  }
+}
+function setWeather(on){
+  if(on===weather.on)return;
+  weather.on=on;
+  rainMesh.visible=on&&started;
+  if(on){
+    applyRainDensity();
+    for(const d of rainDrops)respawnDrop(d);  // fresh field of drops around the player
+    nextThunder=performance.now()/1000+8+Math.random()*22;
+  }
+  AU.rainSet(on);
+  toast(on?'Rain rolling in — riptide is live':'Skies clearing');
+}
+const rainMesh=new THREE.InstancedMesh(
+  new THREE.BoxGeometry(1,1,1),
+  new THREE.MeshBasicMaterial({transparent:true,opacity:0.34,depthWrite:false,fog:false}),
+  RAIN_N);
+rainMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+rainMesh.frustumCulled=false;
+rainMesh.visible=false;                     // clear skies on boot
+scene.add(rainMesh);
+const rainDrops=[];
+const _rv=new THREE.Vector3(),_rs=new THREE.Vector3(),_re=new THREE.Euler();
+{
+  const R=mulberry32(SEED^0xAA17);
+  for(let i=0;i<RAIN_N;i++){
+    const spd=22+R()*10;                    // fall speed — sets streak length feel
+    const wx=1.4+R()*0.6, wz=(R()-0.5)*1.2; // wind
+    const d={x:0,y:-999,z:0,spd,wx,wz,len:0.45+R()*0.3,w:0.014+R()*0.014,fell:0,q:new THREE.Quaternion()};
+    _re.set(Math.atan2(d.wz,spd),0,-Math.atan2(d.wx,spd));   // tilt streak along its velocity
+    d.q.setFromEuler(_re);
+    rainDrops.push(d);
+    rainMesh.setColorAt(i,tmpC.setHex(0xaecbec).offsetHSL(0,0,(R()-0.5)*0.18));
+  }
+  if(rainMesh.instanceColor)rainMesh.instanceColor.needsUpdate=true;
+}
+function respawnDrop(d){
+  d.x=player.pos.x+(Math.random()*2-1)*RAIN_R;
+  d.z=player.pos.z+(Math.random()*2-1)*RAIN_R;
+  d.y=player.pos.y+10+Math.random()*9;
+  d.fell=0;
+}
+function applyRainDensity(){
+  rainMesh.count=Math.max(1,Math.floor(RAIN_N*0.7));   // fixed density — no module controls weather now
+}
+function updateRain(dt){
+  if(!weather.on)return;
+  const n=rainMesh.count;
+  for(let i=0;i<n;i++){
+    const d=rainDrops[i];
+    d.y-=d.spd*dt;d.x+=d.wx*dt;d.z+=d.wz*dt;d.fell+=d.spd*dt;
+    // wrap horizontally around the player so the storm follows you
+    if(d.x-player.pos.x>RAIN_R)d.x-=RAIN_R*2;else if(d.x-player.pos.x<-RAIN_R)d.x+=RAIN_R*2;
+    if(d.z-player.pos.z>RAIN_R)d.z-=RAIN_R*2;else if(d.z-player.pos.z<-RAIN_R)d.z+=RAIN_R*2;
+    const hit=getBlock(Math.floor(d.x),Math.floor(d.y),Math.floor(d.z))!==AIR;
+    if(hit||d.y<player.pos.y-45){
+      // splash only if the drop actually fell through open air — drops
+      // spawned inside rock (player underground) die silently, so dig
+      // sites stay dry with zero particle spam
+      if(hit&&d.fell>3&&Math.random()<0.22)
+        spawnBurst(d.x,d.y+0.05,d.z,0xbcd8ee,2,0.9);
+      respawnDrop(d);
+    }
+    tmpM.compose(_rv.set(d.x,d.y,d.z),d.q,_rs.set(d.w,d.len,d.w));
+    rainMesh.setMatrixAt(i,tmpM);
+  }
+  rainMesh.instanceMatrix.needsUpdate=true;
+}
+/* sky / fog / cloud blend between clear and storm, plus thunder flashes */
+const SKY_CLEAR=new THREE.Color(SKY),SKY_RAIN=new THREE.Color(0x5a6a7e),SKY_FLASH=new THREE.Color(0xdde6f2);
+const CLOUD_CLEAR=new THREE.Color(0xffffff),CLOUD_RAIN=new THREE.Color(0x99a3b4);
+const _sky=new THREE.Color(SKY),_cloud=new THREE.Color(0xffffff);
+let rainLerp=0,flashT=0,nextThunder=Infinity;
+function updateWeatherFX(dt,t){
+  rainLerp+=((weather.on?1:0)-rainLerp)*Math.min(1,dt*1.5);
+  if(flashT>0)flashT-=dt;
+  if(weather.on&&t>nextThunder){
+    nextThunder=t+24+Math.random()*46;
+    flashT=0.3;
+    sfx.thunder();
+  }
+  _sky.copy(SKY_CLEAR).lerp(SKY_RAIN,rainLerp);
+  if(flashT>0)_sky.lerp(SKY_FLASH,(flashT/0.3)*0.65);   // lightning brightens the sky briefly
+  renderer.setClearColor(_sky);
+  scene.fog.color.copy(_sky);
+  scene.fog.near=lerp(FOG_NEAR,24,rainLerp);
+  scene.fog.far=lerp(FOG_FAR,56,rainLerp);
+  _cloud.copy(CLOUD_CLEAR).lerp(CLOUD_RAIN,rainLerp);
+  cloudMat.color.copy(_cloud);
+  cloudMat.opacity=lerp(0.5,0.8,rainLerp);
+}
+
+/* ---------------- Chunkfinder ESP (real + ghost markers) ----------------
+   Draws markers for real sites AND ghost sites identically — you can't
+   tell them apart without digging. ~50% of what you see is nothing.  */
+const espGroup=new THREE.Group();espGroup.visible=false;scene.add(espGroup);
+const espMat=new THREE.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:0.16,depthTest:false,side:THREE.DoubleSide,fog:false});
+const espLineMat=new THREE.LineBasicMaterial({color:0xff4545,transparent:true,opacity:0.8,depthTest:false,fog:false});
+function refreshESP(){
+  while(espGroup.children.length){
+    const m=espGroup.children.pop();m.geometry.dispose();
+  }
+  if(!cheat.esp.on)return;
+  const R=cheat.esp.range;
+  const pcx=Math.floor(player.pos.x)>>4,pcz=Math.floor(player.pos.z)>>4;
+  // iterate the super-cells that cover the chunk range
+  const i0=cellOf(pcx-R),i1=cellOf(pcx+R),j0=cellOf(pcz-R),j1=cellOf(pcz+R);
+  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){
+    for(const s of [siteForCell(i,j),ghostForCell(i,j)]){
+      if(!s)continue;
+      const w=s.x1-s.x0+1,d=s.z1-s.z0+1;
+      const cxw=s.x0+w/2,czw=s.z0+d/2;
+      const y=heightAt(Math.floor(cxw),Math.floor(czw))+1.35;
+      const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),espMat);
+      plane.rotation.x=-Math.PI/2;plane.position.set(cxw,y,czw);plane.renderOrder=990;
+      const pts=[new THREE.Vector3(-w/2,0,-d/2),new THREE.Vector3(w/2,0,-d/2),new THREE.Vector3(w/2,0,d/2),new THREE.Vector3(-w/2,0,d/2)];
+      const line=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),espLineMat);
+      line.position.set(cxw,y,czw);line.renderOrder=991;
+      espGroup.add(plane,line);
+    }
+  }
+}
+function updateESP(t){
+  const p=0.5+0.5*Math.sin(t*2.4);
+  espMat.opacity=0.10+0.08*p;
+  espLineMat.opacity=0.5+0.4*p;
+}
+
+/* ---------------- ECHO client state (tabbed) ----------------
+   tabs: RENDER (reserved) · ECHO ESP (chunkfinder) · ECHO (freecam,
+   echo trident = boost + no-rain, sensitivity) · WORLD (reserved).
+   Select with clicks or 1-4 while the menu is open. A red dot marks
+   tabs with an active module. NO location intel of any kind.            */
+const cheat={
+  freecam:{on:false,speed:14},
+  esp:{on:false,range:12},
+  trident:{boost:0,noRain:false},           // Echo Trident module
+};
+const TABS=['render','espesp','echo','world'];
+let curTab='echo';
+function selectTab(name,quiet){
+  if(!TABS.includes(name))return;
+  curTab=name;
+  document.querySelectorAll('.cm-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelectorAll('.cm-pane').forEach(p=>p.classList.toggle('hidden',p.dataset.pane!==name));
+  if(!quiet)sfx.ui();
+}
+document.querySelectorAll('.cm-tab').forEach(b=>b.addEventListener('click',()=>selectTab(b.dataset.tab)));
+function setFreecam(on){
+  if(on===cheat.freecam.on)return;
+  cheat.freecam.on=on;
+  if(on){fc.pos.copy(camera.position);fc.yaw=player.yaw;fc.pitch=player.pitch;}
+  toast(on?'Freecam enabled':'Freecam disabled','cheat');
+  sfx.toggle();syncMenuUI();updateWatermark();
+}
+function setEsp(on){
+  if(on===cheat.esp.on)return;
+  cheat.esp.on=on;espGroup.visible=on;refreshESP();
+  let msg=on?'Chunkfinder enabled':'Chunkfinder disabled';
+  if(on){
+    const n=espGroup.children.length/2;     // real + ghost markers — indistinguishable
+    msg+=` — ${n} marker${n===1?'':'s'} in range · accuracy not guaranteed`;
+  }
+  toast(msg,'cheat');
+  sfx.toggle();syncMenuUI();updateWatermark();
+}
+function syncMenuUI(){
+  $('swFreecam').checked=cheat.freecam.on;
+  $('swEsp').checked=cheat.esp.on;
+  $('swNoRain').checked=cheat.trident.noRain;
+  $('rgFcSpeed').value=cheat.freecam.speed;$('fcSpeedVal').textContent=cheat.freecam.speed;
+  $('rgEsp').value=cheat.esp.range;$('espVal').textContent=cheat.esp.range;
+  $('rgTriBoost').value=Math.round(cheat.trident.boost*100);$('triBoostVal').textContent='+'+Math.round(cheat.trident.boost*100)+'%';
+  $('rgSens').value=Math.round(sensMult*100);$('sensVal').textContent=Math.round(sensMult*100)+'%';
+  // red dot on tabs that host an active module
+  document.querySelector('.cm-tab[data-tab="espesp"] .cm-dot').classList.toggle('on',cheat.esp.on);
+  document.querySelector('.cm-tab[data-tab="echo"] .cm-dot').classList.toggle('on',cheat.freecam.on);
+}
+ $('swFreecam').addEventListener('change',e=>setFreecam(e.target.checked));
+ $('swEsp').addEventListener('change',e=>setEsp(e.target.checked));
+ $('rgFcSpeed').addEventListener('input',e=>{cheat.freecam.speed=+e.target.value;$('fcSpeedVal').textContent=e.target.value;});
+ $('rgEsp').addEventListener('input',e=>{cheat.esp.range=+e.target.value;$('espVal').textContent=e.target.value;refreshESP();});
+ $('rgTriBoost').addEventListener('input',e=>{
+  cheat.trident.boost=+e.target.value/100;
+  $('triBoostVal').textContent='+'+e.target.value+'%';
+});
+ $('swNoRain').addEventListener('change',e=>{
+  cheat.trident.noRain=e.target.checked;
+  toast(e.target.checked?'No Rain enabled — trident works in any weather':'No Rain off — trident needs rain','cheat');
+  sfx.toggle();
+});
+ $('rgSens').addEventListener('input',e=>{setSens(+e.target.value/100);$('sensVal').textContent=Math.round(sensMult*100)+'%';});
+function updateWatermark(){
+  const act=[cheat.freecam.on?'freecam':null,cheat.esp.on?'chunkfinder':null].filter(Boolean);
+  const wm=$('wm');
+  if(act.length){wm.classList.remove('hidden');wm.textContent='ECHO · '+act.join(', ');}
+  else wm.classList.add('hidden');
+}
+
+/* ---------------- first-person hand / held items / legs ---------------- */
+const handScene=new THREE.Scene();
+const handCam=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,0.01,5);
+handScene.add(new THREE.HemisphereLight(0xffffff,0x404850,1.05));
+const hd=new THREE.DirectionalLight(0xffffff,0.7);hd.position.set(0.5,1,0.4);handScene.add(hd);
+const held=new THREE.Group();handScene.add(held);
+const lam=c=>new THREE.MeshLambertMaterial({color:c});
+const arm=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.7),lam(0xc98f6b));
+arm.position.set(0.1,-0.3,0.32);arm.rotation.x=-0.95;held.add(arm);
+const pickG=new THREE.Group();
+{
+  const handle=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.72,0.07),lam(0x8a6a3f));
+  pickG.add(handle);
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.09,0.09),lam(0xb9bec6));bar.position.y=0.34;pickG.add(bar);
+  const tipL=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.07,0.07),lam(0x8d939c));tipL.position.set(-0.30,0.30,0);tipL.rotation.z=0.5;pickG.add(tipL);
+  const tipR=tipL.clone();tipR.material=lam(0x8d939c);tipR.position.x=0.30;tipR.rotation.z=-0.5;pickG.add(tipR);
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.15,0.13),lam(0xa6abb3));cap.position.y=0.39;pickG.add(cap);
+  pickG.rotation.set(-0.25,0,0.55);pickG.position.set(0,0.06,0);
+  held.add(pickG);
+}
+/* riptide trident — teal shaft, three-pronged head */
+const triG=new THREE.Group();
+{
+  const teal=lam(0x2e6f66),light=lam(0x74d6c9),dark=lam(0x1e4f49);
+  const shaft=new THREE.Mesh(new THREE.BoxGeometry(0.05,1.0,0.05),teal);triG.add(shaft);
+  const mid=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.22,0.06),light);mid.position.y=0.56;triG.add(mid);
+  const cross=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.055,0.055),light);cross.position.y=0.5;triG.add(cross);
+  const tip=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.16,4),light);tip.position.y=0.73;triG.add(tip);
+  const pL=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.2,0.05),light);pL.position.set(-0.15,0.6,0);pL.rotation.z=0.45;triG.add(pL);
+  const pR=pL.clone();pR.material=light;pR.position.x=0.15;pR.rotation.z=-0.45;triG.add(pR);
+  const wrap=new THREE.Mesh(new THREE.BoxGeometry(0.065,0.1,0.065),dark);wrap.position.y=-0.15;triG.add(wrap);
+  triG.rotation.set(-0.2,0,0.45);triG.position.set(0,0.02,0);
+  triG.scale.setScalar(0.92);
+  held.add(triG);
+}
+const fwG=new THREE.Group();
+{
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.3,10),lam(0xd9d2c2));fwG.add(body);
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.055,0.11,10),lam(0xe04343));nose.position.y=0.2;fwG.add(nose);
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(0.053,0.053,0.035,10),lam(0xf0c24e));band.position.y=0.06;fwG.add(band);
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.14,0.03),lam(0x7c6a4e));tail.position.y=-0.2;fwG.add(tail);
+  fwG.rotation.set(-0.35,0,0);held.add(fwG);
+}
+/* legs + feet — slide up into view when you pitch the camera down,
+   so looking straight down actually shows your feet */
+const legsG=new THREE.Group();handScene.add(legsG);
+{
+  const jean=lam(0x3d4c6e),shoe=lam(0x57432f);
+  for(const sx of[-1,1]){
+    const foot=new THREE.Mesh(new THREE.BoxGeometry(0.17,0.11,0.29),shoe);
+    foot.position.set(0.125*sx,-0.16,-0.55);foot.rotation.y=0.12*sx;
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.42,0.16),jean);
+    leg.position.set(0.125*sx,-0.31,-0.42);leg.rotation.x=-0.73;
+    legsG.add(foot,leg);
+  }
+  legsG.visible=false;
+}
+let equipT=1,swingT=10,bobPhase=0,glideLerp=0,boostShake=0,fovKick=0;
+function triggerSwing(){swingT=0;}
+function updateHand(dt){
+  equipT=Math.min(1,equipT+dt*5);
+  swingT+=dt;
+  const swing=swingT<0.26?Math.sin(swingT/0.26*Math.PI):0;
+  const hv=Math.hypot(player.vel.x,player.vel.z);
+  if(player.onGround&&hv>0.5)bobPhase+=dt*hv*1.6;
+  const bobY=Math.sin(bobPhase*2)*0.012,bobX=Math.cos(bobPhase)*0.008;
+  glideLerp+=((gliding?1:0)-glideLerp)*Math.min(1,dt*6);
+  held.position.set(0.5+bobX,-0.44+bobY-(1-equipT)*0.55+glideLerp*0.06,-0.75);
+  held.rotation.set(-0.18-swing*1.25+glideLerp*0.55,-0.42+swing*0.5,0.22-swing*0.35);
+  if(boostShake>0){
+    boostShake-=dt;
+    held.position.x+=(Math.random()-0.5)*0.03*boostShake*10;
+    held.position.y+=(Math.random()-0.5)*0.03*boostShake*10;
+  }
+  pickG.visible=pickaxeOn&&!gliding;
+  triG.visible=tridentOn&&!gliding;
+  fwG.visible=gliding;
+  // legs: fully hidden until ~30° below horizon, fully in at straight-down
+  const down=clamp((-player.pitch-0.55)/(PITCH_LIM-0.55),0,1);
+  legsG.visible=down>0&&!gliding;
+  legsG.position.set(0,(down-1)*1.15+bobY*2,0);
+}
+
+/* ---------------- hotbar UI ---------------- */
+function tileIcon(tile,size=40){
+  const c=document.createElement('canvas');c.width=c.height=size;
+  const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+  g.drawImage(atlasCanvas,(tile%4)*16,((tile/4)|0)*16,16,16,0,0,size,size);
+  return c;
+}
+function buildHotbar(){
+  const hb=$('hotbar');hb.innerHTML='';
+  hotbarSlots.forEach((b,i)=>{
+    const d=document.createElement('div');d.className='slot';
+    d.appendChild(tileIcon(BLOCK_DEF[b].tiles[0]));
+    const ct=document.createElement('span');ct.className='ct';d.appendChild(ct);
+    hb.appendChild(d);
+  });
+}
+function updateHotbar(){
+  const hb=$('hotbar');
+  hotbarSlots.forEach((b,i)=>{
+    const d=hb.children[i];
+    d.classList.toggle('sel',i===hotbarSel);
+    d.classList.toggle('empty',(inv[b]||0)<=0);
+    d.querySelector('.ct').textContent=inv[b]||0;
+  });
+  const b=hotbarSlots[hotbarSel];
+  $('heldName').textContent=BLOCK_DEF[b].name+' × '+(inv[b]||0);
+}
+
+/* ---------------- HUD / debug ----------------
+   NO dig-site intel here on purpose — the debug overlay is technical
+   info only. Site locations are revealed solely through the ECHO
+   client's Chunkfinder markers (half of which are ghosts). Rain state
+   is shown since the trident depends on it. The "layer" line tells you
+   which stratum of the deep world you're standing in.                  */
+let frames=0,fps=0,lastFpsT=performance.now(),lastHudT=0;
+function updateHud(now){
+  frames++;
+  if(now-lastFpsT>500){fps=Math.round(frames*1000/(now-lastFpsT));frames=0;lastFpsT=now;}
+  if(now-lastHudT<150)return;
+  lastHudT=now;
+  const p=player.pos;
+  const look=getLookDir(tmpA);
+  const dir=Math.abs(look.x)>Math.abs(look.z)?(look.x>0?'EAST':'WEST'):(look.z>0?'SOUTH':'NORTH');
+  const pcx=Math.floor(p.x)>>4,pcz=Math.floor(p.z)>>4;
+  const hit=inputOn()&&!cheat.freecam.on?raycastVoxel(camera.position,look,REACH):null;
+  // which layer are we in? (relative to this column's actual surface)
+  const surf=heightAt(Math.floor(p.x),Math.floor(p.z));
+  const L=p.y>surf+1?'air':p.y>=surf?'grass':p.y>=surf-6?'dirt':p.y>=0?'stone':p.y>=-59?'deepslate':'bedrock';
+  $('debug').textContent=
+`DEEPSLATE  ${fps} fps
+XYZ  ${p.x.toFixed(1)} / ${p.y.toFixed(1)} / ${p.z.toFixed(1)}   chunk ${pcx},${pcz}   layer ${L}
+facing ${dir}   pitch ${(player.pitch*57.3).toFixed(0)}°   sens ${Math.round(sensMult*100)}%
+target ${hit?BLOCK_DEF[hit.block].name+' ('+hit.x+' '+hit.y+' '+hit.z+')':'—'}
+ground ${player.onGround?'YES':'NO'}   glide ${gliding?'YES':'NO'}   rain ${weather.on?'YES':'NO'}   mouse ${locked()?'captured':(softLock?'fallback':'—')}
+seed ${SEED}`;
+  const gh=$('glideHud');
+  if(gliding){gh.classList.remove('hidden');$('glideSpd').textContent=player.vel.length().toFixed(1);}
+  else gh.classList.add('hidden');
+  if(cheatOpen){
+    $('cmPos').textContent=`XYZ ${p.x.toFixed(0)} ${p.y.toFixed(0)} ${p.z.toFixed(0)}`;
+    $('cmMeta').textContent=`${fps} fps · ${chunks.size} chunks`;
+  }
+}
+
+/* ---------------- camera & fov ---------------- */
+function updateCamera(dt){
+  if(cheat.freecam.on){
+    camera.position.copy(fc.pos);
+    camera.rotation.set(fc.pitch,fc.yaw,0);
+  }else{
+    camera.position.set(player.pos.x,player.pos.y+EYE,player.pos.z);
+    camera.rotation.set(player.pitch,player.yaw,0);
+  }
+  fovKick=Math.max(0,fovKick-fovKick*6*dt);
+  let target=75+(sprinting?5:0);
+  if(gliding)target+=clamp((player.vel.length()-14)*0.45,0,14);
+  camera.fov+=(target+fovKick-camera.fov)*Math.min(1,dt*9);
+  camera.updateProjectionMatrix();
+  handCam.fov=camera.fov*0.82;
+  handCam.updateProjectionMatrix();
+}
+
+/* ---------------- boot ---------------- */
+buildHotbar();updateHotbar();syncMenuUI();applyRainDensity();
+ $('bootSeed').textContent=SEED;$('pauseSeed').textContent=SEED;
+refreshStreaming(true);bootTotal=queue.length;
+const bootStep=()=>{
+  processQueue(14);
+  const done=bootTotal-queue.length;
+  $('bootFill').style.width=(bootTotal?Math.round(done/bootTotal*100):100)+'%';
+  $('bootNote').textContent=queue.length?'carving terrain… '+done+' / '+bootTotal+' chunks':'world ready';
+  if(queue.length)requestAnimationFrame(bootStep);
+  else $('btnEnter').disabled=false;
+};
+requestAnimationFrame(bootStep);
+ $('btnEnter').addEventListener('click',e=>{
+  e.target.blur();
+  AU.init();if(AU.ctx.state==='suspended')AU.ctx.resume();
+  started=true;
+  $('boot').classList.add('hidden');
+  for(const id of['cross','debug','hotbar','heldName'])$(id).classList.remove('hidden');
+  attemptLock();syncCursor();
+  // weather cycle starts CLEAR — first rain arrives after RAIN_PERIOD seconds
+  rainMesh.visible=weather.on;             // false
+  for(const d of rainDrops)respawnDrop(d);
+  weatherTimer=0;
+  setTimeout(()=>toast('Press [1] to draw your pickaxe'),900);
+  setTimeout(()=>toastOnce('t2','Hold LMB on a block to mine it — blocks go to your hotbar'),6500);
+  setTimeout(()=>toastOnce('t3','Double-tap SPACE anywhere — even on the ground — to deploy your elytra'),13000);
+  setTimeout(()=>toastOnce('t4','Press [2] for the trident — RMB riptides once the rain rolls in'),19000);
+  setTimeout(()=>toastOnce('t5','[ / ] adjust look sensitivity · RSHIFT opens ECHO','cheat'),25000);
+});
+
+/* ---------------- main loop ---------------- */
+let lastT=performance.now(),acc=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min(0.1,(now-lastT)/1000);lastT=now;
+  if(started){
+    if(!paused){                          // physics + weather clock freeze while paused
+      acc+=dt;let n=0;
+      while(acc>=STEP&&n<5){physStep(STEP);acc-=STEP;n++;}
+      updateWeatherCycle(dt);
+    }else acc=0;
+    refreshStreaming(false);
+    processQueue(4);
+    updateCamera(dt);
+    updateMining(dt);
+    updateRiptide(dt);
+    updateHand(dt);
+    updateParticles(dt);
+    updateClouds(dt);
+    updateRain(dt);
+    updateWeatherFX(dt,now/1000);
+    updateESP(now/1000);
+    updateHud(now);
+    if(boostTrail>0){
+      boostTrail-=dt;
+      const look=getLookDir(tmpA);
+      spawnBurst(camera.position.x-look.x*0.8,camera.position.y-look.y*0.8,camera.position.z-look.z*0.8,Math.random()<0.5?0xffb347:0xfff1d0,2,1.2);
+    }
+    if(ripTrail>0){                       // brief cyan water-wake after a riptide
+      ripTrail-=dt;
+      const p=player.pos;
+      spawnBurst(p.x,p.y+0.6+Math.random(),p.z,Math.random()<0.5?0x59d7ff:0xbef1ff,2,1.4);
+    }
+  }else{
+    camera.position.set(player.pos.x,player.pos.y+EYE,player.pos.z);
+    camera.rotation.set(player.pitch,player.yaw,0);
+  }
+  renderer.clear();
+  renderer.render(scene,camera);
+  if(started&&!cheat.freecam.on){
+    renderer.clearDepth();
+    renderer.render(handScene,handCam);
+  }
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
